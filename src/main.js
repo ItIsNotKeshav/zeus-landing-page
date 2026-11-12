@@ -1,6 +1,7 @@
 import Lenis from "lenis";
 import { Sky } from "./scene.js";
 import { THEMES } from "./themes.js";
+import { REPO, fromApi, renderRelease, version } from "./releases.js";
 
 const root = document.documentElement;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -282,6 +283,75 @@ for (const button of $$(".feature-col button")) {
   button.addEventListener("focus", show);
   button.addEventListener("click", show);
 }
+
+// Releases: each one opens in place; the newest is open to begin with.
+const releaseList = $("[data-release-list]");
+function setOpen(release, open) {
+  release.classList.toggle("is-open", open);
+  $(".release-head", release).setAttribute("aria-expanded", String(open));
+}
+releaseList.addEventListener("click", (event) => {
+  const head = event.target.closest(".release-head");
+  if (!head) return;
+  const release = head.closest(".release");
+  setOpen(release, !release.classList.contains("is-open"));
+  setTimeout(measure, 650);
+});
+for (const button of $$("[data-releases-toggle]")) {
+  button.addEventListener("click", () => {
+    const open = button.dataset.releasesToggle === "open";
+    for (const release of $$(".release", releaseList)) setOpen(release, open);
+    setTimeout(measure, 650);
+  });
+}
+
+// A link to one release (#release-0-40-0) opens it on the way there.
+function openFromHash() {
+  const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+  if (target?.classList.contains("release")) setOpen(target, true);
+}
+window.addEventListener("hashchange", openFromHash);
+openFromHash();
+
+// Anything published since this page was built is fetched from GitHub and added on top.
+async function freshReleases() {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=10`, {
+      headers: { Accept: "application/vnd.github+json" },
+    });
+    if (!response.ok) return;
+    const known = new Set($$(".release", releaseList).map((node) => node.dataset.tag));
+    const fresh = (await response.json())
+      .filter((r) => !r.draft && r.published_at && !known.has(r.tag_name))
+      .map(fromApi)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    if (!fresh.length) return;
+    for (const old of $$(".release", releaseList)) {
+      $(".release-badge:not(.is-beta)", old)?.remove();
+      setOpen(old, false);
+    }
+    fresh.forEach((release, i) => {
+      const newest = i === fresh.length - 1;
+      releaseList.insertAdjacentHTML("afterbegin", renderRelease(release, { latest: newest, open: newest }));
+      releaseList.firstElementChild.classList.add("is-in", "is-fresh");
+    });
+    const latest = version(fresh[fresh.length - 1].tag);
+    for (const node of $$("[data-latest-version]")) node.textContent = latest;
+    const count = $("[data-release-count]");
+    if (count) count.textContent = String($$(".release", releaseList).length);
+    measure();
+  } catch {
+    // Offline or rate-limited: the notes built into the page stand.
+  }
+}
+new IntersectionObserver(
+  (entries, observer) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    observer.disconnect();
+    freshReleases();
+  },
+  { rootMargin: "60% 0px" },
+).observe(releaseList);
 
 // Entrances: each part of a section rises in turn.
 const reveal = new IntersectionObserver(

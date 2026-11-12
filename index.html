@@ -26,10 +26,11 @@
       <span>Zeus</span>
     </a>
     <nav class="nav-links" aria-label="Sections">
-      <a href="#speed">Speed</a>
+      <a href="#new">What's new</a>
       <a href="#themes">Themes</a>
       <a href="#calls">Calls</a>
       <a href="#linking">Privacy</a>
+      <a href="#releases">Releases</a>
     </nav>
     <a class="btn btn-small" href="#download">Download</a>
   </header>
@@ -37,13 +38,19 @@
   <main id="main">
     <!-- The name as a monument: the Z is the 3D bolt, drawn by the canvas into this slot. -->
     <section class="hero" id="top" data-scene="hero">
+      <a class="news-pill" href="#new" data-latest-pill>
+        <span class="news-dot" aria-hidden="true"></span>
+        <span>New in <strong>Zeus %LATEST_VERSION%</strong>: first-run setup, split view and much faster search</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
       <h1 class="monument" data-reveal-hero>
         <span class="slot" data-slot="hero">Z</span>eus
       </h1>
       <div class="hero-foot">
         <p class="lede">WhatsApp for your desktop, written in Rust. Native on Windows, macOS and Linux, with no browser inside.</p>
         <div class="actions">
-          <a class="btn" href="#download">Download Zeus</a>
+          <a class="btn" href="#download">Download Zeus %LATEST_VERSION%</a>
+          <a class="text-link" href="#releases">Release notes</a>
           <a class="text-link" href="https://github.com/ItIsNotKeshav/Zeus">Source on GitHub</a>
         </div>
       </div>
@@ -141,10 +148,60 @@
           <p data-call-text>Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.</p>
         </div>
         <div class="cells">
-          <p class="cell">Turn on push to talk, then hold Space when the room is loud.</p>
-          <p class="cell cell-alt">Pick your microphone once, in Settings.</p>
+          <p class="cell">Echo cancelling keeps your speakers out of the call and lifts quiet voices.</p>
+          <p class="cell cell-alt">Turn on push to talk, then hold Space when the room is loud.</p>
         </div>
       </div>
+    </section>
+
+    <section class="whatsnew" id="new" aria-labelledby="new-title">
+      <div class="whatsnew-head" data-reveal>
+        <p class="eyebrow"><time datetime="%LATEST_DATE_ISO%">%LATEST_DATE%</time> · Zeus %LATEST_VERSION%</p>
+        <h2 id="new-title">New lately.</h2>
+        <p>The biggest things from the last few releases. Every change is listed under <a href="#releases">Releases</a>.</p>
+      </div>
+      <ul class="news-grid">
+        <li class="news-card news-wide" data-reveal>
+          <span class="news-ver">0.41</span>
+          <h3>A first-run setup</h3>
+          <p>A new copy of Zeus walks you through the look, your name, notifications and privacy before it shows the QR code, with a live preview beside each step. While it loads, the outline of your chats appears at once and fades into the real thing.</p>
+        </li>
+        <li class="news-card" data-reveal>
+          <span class="news-ver">0.41 <em>Experimental</em></span>
+          <h3>Split view and pop-out chats</h3>
+          <p>Open a second chat beside the first, or pull one out into its own window.</p>
+        </li>
+        <li class="news-card" data-reveal>
+          <span class="news-ver">0.41 <em>Experimental</em></span>
+          <h3>Chat bubbles</h3>
+          <p>Keep chats as floating circles over your other apps, and open one as a small chat card.</p>
+        </li>
+        <li class="news-card" data-reveal>
+          <span class="news-ver">0.41</span>
+          <h3>Search that keeps up</h3>
+          <p>Results come from an index instead of reading every message, so they arrive as you pause.</p>
+        </li>
+        <li class="news-card" data-reveal>
+          <span class="news-ver">0.41</span>
+          <h3>Sent, Delivered, Read</h3>
+          <p>Your newest message says where it is in words, not ticks.</p>
+        </li>
+        <li class="news-card" data-reveal>
+          <span class="news-ver">0.41</span>
+          <h3>Block and disappearing messages</h3>
+          <p>Block from a chat's menu, and set a chat's timer in two clicks.</p>
+        </li>
+        <li class="news-card" data-reveal>
+          <span class="news-ver">0.40</span>
+          <h3>Group calls</h3>
+          <p>Start and answer group voice and video calls, with echo cancelling on every call.</p>
+        </li>
+        <li class="news-card news-wide" data-reveal>
+          <span class="news-ver">0.36 – 0.41</span>
+          <h3>Lighter and smoother</h3>
+          <p>Idle memory fell from about 430 MB to about 125 MB in our test, the pickers open without a freeze, and photos, messages and chat rows now move on springs.</p>
+        </li>
+      </ul>
     </section>
 
     <section class="features" id="features" aria-labelledby="features-title">
@@ -162,18 +219,22 @@
             <li><button type="button" data-tip="Star a message to find it later from the rail.">Starred messages</button></li>
             <li><button type="button" data-tip="Favorite chats stay in the order your phone keeps them.">Favorite chats</button></li>
             <li><button type="button" data-tip="Lock private chats behind their own folder.">Locked chats</button></li>
+            <li><button type="button" data-tip="Your newest message says Sent, Delivered or Read, in words.">Read labels</button></li>
+            <li><button type="button" data-tip="Block from a chat's menu or the contact panel; the list lives in Settings.">Blocking</button></li>
+            <li><button type="button" data-tip="Set a chat's timer from its menu, and the chat notes each change.">Disappearing messages</button></li>
           </ul>
         </div>
         <div class="feature-col" data-reveal>
           <h3>Media</h3>
           <ul>
-            <li><button type="button" data-tip="Photos and albums open in a full-window viewer.">Photos and albums</button></li>
+            <li><button type="button" data-tip="Pictures chosen together travel as one album, and open in a full-window viewer.">Photos and albums</button></li>
             <li><button type="button" data-tip="Videos and round video notes play right in the chat.">Videos in place</button></li>
             <li><button type="button" data-tip="Record, seek, and play back at 1.5 or 2 times speed.">Voice messages</button></li>
-            <li><button type="button" data-tip="Animated stickers play, and your favourites sync with your phone.">Stickers</button></li>
+            <li><button type="button" data-tip="Animated and Lottie stickers play, and your favourites sync with your phone.">Stickers</button></li>
             <li><button type="button" data-tip="Search GIPHY from the picker, with your own key in Settings.">GIF search</button></li>
             <li><button type="button" data-tip="Files show a preview and progress while they send.">Documents</button></li>
-            <li><button type="button" data-tip="Links show a title, a picture and their site.">Link previews</button></li>
+            <li><button type="button" data-tip="Links show a title, a picture and their site, even before you send them.">Link previews</button></li>
+            <li><button type="button" data-tip="Doodle wallpapers in any colour and density, showing through the frosted glass.">Doodle wallpapers</button></li>
             <li><button type="button" data-tip="Send a place, and open the ones you receive.">Locations</button></li>
           </ul>
         </div>
@@ -181,11 +242,16 @@
           <h3>Desktop</h3>
           <ul>
             <li><button type="button" data-tip="Link more than one number and switch from your picture on the rail.">Several numbers</button></li>
-            <li><button type="button" data-tip="Close the window and Zeus keeps you linked from the tray.">Tray and notifications</button></li>
+            <li><button type="button" data-tip="Close the window and Zeus keeps you linked from the tray, with the unread count on its icon.">Tray and notifications</button></li>
+            <li><button type="button" data-tip="Swipe chats to archive, pin or mute, and swipe a message to reply.">Touchpad swipes</button></li>
+            <li><button type="button" data-tip="Drag a message onto a chat to forward it, or drag files out to your desktop.">Drag and drop</button></li>
+            <li><button type="button" data-tip="Open two chats side by side, or pop one out (Experimental).">Split view</button></li>
             <li><button type="button" data-tip="Search, switch chats, reply and record without the mouse.">Keyboard shortcuts</button></li>
             <li><button type="button" data-tip="Select text across messages and copy it with names and times.">Copy across messages</button></li>
             <li><button type="button" data-tip="A password on the window when you step away.">App lock</button></li>
             <li><button type="button" data-tip="Translated into ten languages, from German to Traditional Chinese.">Ten languages</button></li>
+            <li><button type="button" data-tip="Two minutes of smoothness, memory, CPU and GPU, run on sample chats, never yours.">Built-in benchmark</button></li>
+            <li><button type="button" data-tip="Zeus checks for new releases and installs them itself.">Updates itself</button></li>
             <li><button type="button" data-tip="Its own installer, folders and settings, so both apps can run.">Runs beside ZapFast</button></li>
           </ul>
         </div>
@@ -206,6 +272,24 @@
       </div>
     </section>
 
+    <section class="releases" id="releases" aria-labelledby="releases-title">
+      <div class="releases-side">
+        <div class="releases-intro" data-reveal>
+          <h2 id="releases-title">Releases.</h2>
+          <p>Every version of Zeus and what it changed, newest first. Zeus checks for updates on its own and installs them, so most of this arrives without you lifting a finger.</p>
+          <p class="releases-meta"><span data-release-count>%RELEASE_COUNT%</span> releases · latest <strong data-latest-version>%LATEST_VERSION%</strong></p>
+          <div class="releases-actions">
+            <button type="button" class="chip" data-releases-toggle="open">Open all</button>
+            <button type="button" class="chip" data-releases-toggle="close">Close all</button>
+            <a class="text-link" href="https://github.com/ItIsNotKeshav/Zeus/releases">All on GitHub</a>
+          </div>
+        </div>
+      </div>
+      <div class="release-list" data-release-list>
+<!--releases-->
+      </div>
+    </section>
+
     <a class="band" href="https://github.com/ItIsNotKeshav/Zeus/releases/latest">
       <span class="band-note">Free and open source under the MIT licence. Windows, macOS and Linux.</span>
       <svg class="band-arrow" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 34 34 14M17 14h17v17" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/></svg>
@@ -213,7 +297,7 @@
     </a>
 
     <section class="download" id="download" aria-labelledby="download-title">
-      <h2 id="download-title">Download</h2>
+      <h2 id="download-title">Download <span class="download-ver">%LATEST_VERSION%</span></h2>
       <table class="lineup">
         <caption class="visually-hidden">Zeus downloads by platform</caption>
         <thead class="visually-hidden">
@@ -228,15 +312,15 @@
           </tr>
           <tr>
             <th scope="row">macOS</th>
-            <td>Archive for Apple Silicon or Intel</td>
+            <td>Universal disk image for Apple silicon and Intel</td>
             <td>Built, not yet tried</td>
-            <td><a href="https://github.com/ItIsNotKeshav/Zeus/releases/latest">.tar.gz</a></td>
+            <td><a href="https://github.com/ItIsNotKeshav/Zeus/releases/latest">.dmg</a></td>
           </tr>
           <tr>
             <th scope="row">Linux</th>
-            <td>Archive with a desktop entry and icon</td>
+            <td>.deb, .rpm, AppImage or .tar.gz, for x86_64 and aarch64</td>
             <td>Built, not yet tried</td>
-            <td><a href="https://github.com/ItIsNotKeshav/Zeus/releases/latest">.tar.gz</a></td>
+            <td><a href="https://github.com/ItIsNotKeshav/Zeus/releases/latest">Packages</a></td>
           </tr>
           <tr>
             <th scope="row">Source</th>
@@ -246,7 +330,7 @@
           </tr>
         </tbody>
       </table>
-      <p class="download-note">The Windows installer is not code-signed, so SmartScreen warns once: choose More info, then Run anyway. The macOS and Linux builds come from GitHub Actions; please report what you find.</p>
+      <p class="download-note">The Windows installer is not code-signed, so SmartScreen warns once: choose More info, then Run anyway. The Mac app is not signed by Apple either, so the first time, right-click Zeus in Applications and choose Open. The macOS and Linux builds come from GitHub Actions; please report what you find.</p>
     </section>
   </main>
 
@@ -258,6 +342,7 @@
       </div>
       <ul class="footer-links">
         <li><a href="https://github.com/ItIsNotKeshav/Zeus">Zeus on GitHub</a></li>
+        <li><a href="#releases">Release notes</a></li>
         <li><a href="https://github.com/crmne/zapfast">ZapFast, the original</a></li>
         <li><a href="https://zapfast.rocks/">ZapFast's guides</a></li>
         <li><a href="https://github.com/ItIsNotKeshav/Zeus/issues">Report a problem</a></li>
