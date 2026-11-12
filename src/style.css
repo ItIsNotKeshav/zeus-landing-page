@@ -3792,3 +3792,186 @@ body {
     transition: none;
   }
 }
+
+/* ===========================================================================
+   One centred column: every section's content sits in the same 1240px
+   column on wide screens, with the page margin on narrow ones.
+   =========================================================================== */
+main > section:not(.hero) {
+  padding-inline: max(var(--m), calc((100% - 1240px) / 2));
+}
+
+.rb,
+.releases-foot {
+  max-width: none;
+}
+
+/* Themes: a proper settings card. Accents in one even row, the themes as
+   named chips in a three-column grid, labels above each group. */
+.theme-card {
+  justify-items: stretch;
+  gap: 10px;
+  width: min(460px, 100%);
+  padding: 16px;
+  border-radius: var(--radius-panel);
+}
+
+.theme-card .tc-modes {
+  justify-self: center;
+  margin-bottom: 6px;
+}
+
+.tc-label {
+  margin: 6px 2px 0;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.tc-accents:not([hidden]) {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: var(--radius-card);
+  background: var(--tint-field);
+}
+
+.theme-card .tc-accents button {
+  width: min(26px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.tc-themes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.theme-card .tc-themes button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: auto;
+  height: 44px;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: var(--tint-field);
+  box-shadow: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 560;
+  text-align: left;
+  transition: background-color var(--duration-control) var(--ease-out), box-shadow var(--duration-control) var(--ease-out), transform var(--duration-control) var(--ease-out);
+}
+
+.theme-card .tc-themes button::before,
+.theme-card .tc-themes button::after {
+  display: none;
+}
+
+.theme-card .tc-themes button:hover {
+  background: var(--tint-hover);
+}
+
+.theme-card .tc-themes button[aria-checked="true"] {
+  background: var(--tint-selected);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+.tc-disc {
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--chat);
+  box-shadow: inset 0 0 0 1px var(--outline);
+  transition: background-color var(--duration-slide) var(--ease-out-strong);
+}
+
+.tc-disc::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--dot);
+  transition: background-color var(--duration-slide) var(--ease-out-strong);
+}
+
+.tc-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-card .picker-status {
+  margin-top: 6px;
+}
+
+@media (max-width: 420px) {
+  .theme-card {
+    padding: 12px;
+  }
+
+  .tc-accents:not([hidden]) {
+    padding: 8px 4px;
+  }
+
+  .theme-card .tc-accents button::after {
+    inset: -3px;
+  }
+
+  .theme-card .tc-themes button {
+    gap: 6px;
+    height: 40px;
+    padding: 0 7px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  .tc-disc {
+    width: 16px;
+    height: 16px;
+  }
+
+  .tc-disc::after {
+    inset: 4px;
+  }
+}
+
+/* The footer keeps its full-width band and name; its words sit in the column. */
+.footer > :not(.footer-name):not(.sticker-pit) {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+}
+
+@media (max-width: 900px) {
+  .footer-links {
+    grid-auto-flow: row;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    overflow: visible;
+  }
+}
+
+/* The footer's name in the same serif as the hero's. */
+.footer-name {
+  font-family: var(--font-serif);
+  font-weight: 560;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-size: min(36vw, 64svh);
+  line-height: 0.8;
+  letter-spacing: -0.045em;
+  text-transform: none;
+  text-align: center;
+  margin: 0 0 -0.12em;
+  transform: none;
+}

@@ -71,8 +71,8 @@ for (const theme of THEMES) {
   button.type = "button";
   button.setAttribute("role", "radio");
   button.dataset.theme = theme.id;
-  button.title = theme.name;
-  button.setAttribute("aria-label", theme.name);
+  button.innerHTML = '<span class="tc-disc" aria-hidden="true"></span><span class="tc-name"></span>';
+  button.lastChild.textContent = theme.name;
   themeGroup.append(button);
 }
 if (ACCENT_STILLS) {
