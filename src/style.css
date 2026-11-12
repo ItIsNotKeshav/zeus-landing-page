@@ -3975,3 +3975,52 @@ main > section:not(.hero) {
   margin: 0 0 -0.12em;
   transform: none;
 }
+
+/* Themes: the card beside a big window. This section runs wider than the
+   others so the window can be large. */
+main > section.themes {
+  grid-template-columns: min(400px, 34%) minmax(0, 1fr);
+  column-gap: clamp(24px, 3vw, 48px);
+  row-gap: clamp(32px, 4vw, 56px);
+  align-items: center;
+  padding-inline: max(var(--m), calc((100% - 1560px) / 2));
+}
+
+.themes .themes-copy {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  max-width: 60ch;
+}
+
+.themes .picker {
+  grid-column: 1;
+  grid-row: 2;
+  width: 100%;
+  align-self: center;
+}
+
+.themes .stage {
+  grid-column: 2;
+  grid-row: 2;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  main > section.themes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .themes .picker,
+  .themes .stage {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .themes .stage {
+    order: -1;
+  }
+
+  .themes .themes-copy {
+    order: -2;
+  }
+}
