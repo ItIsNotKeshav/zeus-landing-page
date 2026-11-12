@@ -3375,3 +3375,420 @@ body {
     margin-left: auto;
   }
 }
+
+/* ===========================================================================
+   Light blue: a sky hero after Dia and Cluely. The name sits behind the app
+   window, a horizon carries the download, and scrolling (--p, 0 to 1) lifts
+   the words away while the window grows to fill the screen.
+   =========================================================================== */
+:root {
+  --brand: #2f7bff;
+  --brand-hi: #5a98ff;
+  --brand-glow: rgb(47 123 255 / 0.38);
+  --sky-top: #8fc2ff;
+  --sky-mid: #c4e0ff;
+  --sky-low: #eaf4ff;
+}
+
+:root.is-dark {
+  --sky-top: #0e2547;
+  --sky-mid: #0b1830;
+  --sky-low: #0a0f19;
+}
+
+/* The one blue: primary buttons, with a soft glow under them. */
+.btn:not(.btn-quiet) {
+  background: linear-gradient(180deg, var(--brand-hi), var(--brand));
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 8px 24px -6px var(--brand-glow);
+}
+
+.btn:not(.btn-quiet):hover,
+.btn:not(.btn-quiet):focus-visible {
+  background: linear-gradient(180deg, #6ea6ff, #3b84ff);
+  color: #fff;
+}
+
+.footer .btn-ink {
+  background: #141414;
+}
+
+.news-dot {
+  background: var(--brand);
+  animation-name: news-ping-blue;
+}
+
+@keyframes news-ping-blue {
+  0% { box-shadow: 0 0 0 0 rgb(47 123 255 / 0.55); }
+  70%, 100% { box-shadow: 0 0 0 9px rgb(47 123 255 / 0); }
+}
+
+.aurora {
+  display: none;
+}
+
+/* The pinned hero. */
+.hero {
+  --p: 0;
+  position: relative;
+  display: block;
+  height: 240svh;
+  min-height: 0;
+  padding: 0;
+  overflow: visible;
+  text-align: center;
+}
+
+.hero-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 42%, var(--sky-low) 78%, var(--bg) 100%);
+  opacity: calc(1 - var(--p) * 0.8);
+}
+
+.sky i {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.sun {
+  top: 30%;
+  right: 12%;
+  width: 18vw;
+  height: 18vw;
+  background: radial-gradient(circle, #ffffff 0 38%, rgb(255 255 255 / 0.55) 52%, rgb(255 255 255 / 0) 70%);
+  transform: translateY(calc(var(--p) * 30vh));
+}
+
+.is-dark .sun {
+  background: radial-gradient(circle, #dfe9ff 0 30%, rgb(200 220 255 / 0.25) 48%, rgb(200 220 255 / 0) 68%);
+  width: 10vw;
+  height: 10vw;
+  top: 18%;
+}
+
+.cloud {
+  height: 14vw;
+  background: #ffffff;
+  filter: blur(40px);
+  opacity: 0.65;
+  animation: cloud-drift 60s linear infinite alternate;
+}
+
+.is-dark .cloud {
+  opacity: 0.05;
+}
+
+.c1 { top: 8%; left: -6%; width: 40vw; }
+.c2 { top: 22%; right: -10%; width: 46vw; animation-duration: 80s; animation-delay: -20s; }
+.c3 { top: 46%; left: 10%; width: 30vw; height: 10vw; animation-duration: 70s; animation-delay: -35s; opacity: 0.5; }
+.c4 { top: 52%; right: 6%; width: 34vw; height: 10vw; animation-duration: 90s; animation-delay: -10s; opacity: 0.45; }
+
+@keyframes cloud-drift {
+  from { transform: translateX(-4vw); }
+  to { transform: translateX(6vw); }
+}
+
+/* Feature tiles floating round the welcome, after T3's. */
+.tiles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: calc(1 - var(--p) * 2.4);
+}
+
+.tile {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--menu-glass);
+  -webkit-backdrop-filter: blur(var(--blur-menu)) saturate(1.3);
+  backdrop-filter: blur(var(--blur-menu)) saturate(1.3);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 10px 30px -8px rgb(20 40 80 / 0.3);
+  color: var(--ink);
+  animation: tile-bob 7s var(--ease-in-out) infinite alternate;
+}
+
+.tile svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.t1 { top: 16%; left: 14%; rotate: -8deg; color: var(--brand); }
+.t2 { top: 12%; right: 16%; rotate: 7deg; animation-delay: -2s; }
+.t3 { top: 40%; left: 7%; rotate: 6deg; animation-delay: -4s; width: 76px; height: 76px; border-radius: 24px; }
+.t4 { top: 38%; right: 8%; rotate: -6deg; animation-delay: -1s; width: 76px; height: 76px; border-radius: 24px; }
+.t5 { top: 60%; left: 18%; rotate: -4deg; animation-delay: -3s; }
+.t6 { top: 58%; right: 19%; rotate: 9deg; animation-delay: -5s; }
+
+.tiles .tile {
+  translate: calc(var(--side, 0) * var(--p) * 30vw) calc(var(--p) * -20vh);
+}
+
+.t1, .t3, .t5 { --side: -1; }
+.t2, .t4, .t6 { --side: 1; }
+
+@keyframes tile-bob {
+  from { transform: translateY(-6px); }
+  to { transform: translateY(8px); }
+}
+
+.js-motion .tile {
+  opacity: 0;
+  scale: 0.8;
+  transition: opacity 0.9s var(--ease-out-strong), scale 1s var(--ease-out-strong);
+}
+
+.js-motion.is-loaded .tile {
+  opacity: 1;
+  scale: 1;
+}
+
+.js-motion.is-loaded .t1 { transition-delay: 0.5s; }
+.js-motion.is-loaded .t2 { transition-delay: 0.6s; }
+.js-motion.is-loaded .t3 { transition-delay: 0.7s; }
+.js-motion.is-loaded .t4 { transition-delay: 0.8s; }
+.js-motion.is-loaded .t5 { transition-delay: 0.9s; }
+.js-motion.is-loaded .t6 { transition-delay: 1s; }
+
+/* The words. */
+.hero .hero-copy {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  padding: clamp(104px, 13svh, 140px) var(--m) 0;
+  transform: translateY(calc(var(--p) * -14vh));
+  opacity: calc(1 - var(--p) * 2.2);
+  filter: blur(calc(var(--p) * 10px));
+}
+
+.is-light .hero-title {
+  color: #0b1a2e;
+}
+
+.is-light .hero .lede {
+  color: #34475f;
+}
+
+.hero .news-pill {
+  margin-bottom: clamp(18px, 2.6vw, 30px);
+}
+
+.hero .actions {
+  justify-content: center;
+  margin-top: clamp(24px, 3vw, 34px);
+}
+
+.btn-big {
+  min-height: 54px;
+  padding: 0 30px;
+  font-size: 16.5px;
+}
+
+.hero .btn-quiet {
+  background: rgb(255 255 255 / 0.55);
+  -webkit-backdrop-filter: blur(var(--blur-menu)) saturate(1.3);
+  backdrop-filter: blur(var(--blur-menu)) saturate(1.3);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+  color: #0b1a2e;
+}
+
+.is-dark .hero .btn-quiet {
+  background: rgb(255 255 255 / 0.08);
+  color: var(--ink);
+}
+
+/* Where the window's top edge sits before any scrolling. */
+.hero-pin {
+  --win-top: clamp(600px, 75svh, 780px);
+}
+
+/* The name, large, behind the window: only its top half shows. */
+.hero-word {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--win-top);
+  z-index: 0;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(160px, 25vw, 400px);
+  font-weight: 560;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: rgb(255 255 255 / 0.9);
+  text-shadow: 0 10px 40px rgb(20 60 140 / 0.14);
+  translate: 0 calc(-0.6em - var(--p) * 18vh);
+  opacity: calc(1 - var(--p) * 1.8);
+  pointer-events: none;
+  user-select: none;
+}
+
+.is-dark .hero-word {
+  color: rgb(233 240 255 / 0.92);
+  text-shadow: 0 10px 50px rgb(80 140 255 / 0.2);
+}
+
+.js-motion.is-loaded .hero-word {
+  animation: word-in 1.6s var(--ease-out-strong) 0.3s backwards;
+}
+
+@keyframes word-in {
+  from { opacity: 0; filter: blur(14px); }
+}
+
+/* The window: starts low in front of the name, rises and grows to fill the screen. */
+.hero .hero-frame,
+.js-motion .hero .hero-frame,
+.js-motion.is-loaded .hero .hero-frame {
+  --base: min(1060px, calc(100vw - 2 * var(--m)));
+  --grow: calc(min(1440px, calc(100vw - 24px)) / min(1060px, calc(100vw - 2 * var(--m))));
+  position: absolute;
+  left: calc(50% - var(--base) / 2);
+  top: var(--win-top);
+  z-index: 2;
+  width: var(--base);
+  margin: 0;
+  perspective: none;
+  opacity: 1;
+  filter: none;
+  transform: none;
+  transition: none;
+  transform-origin: 50% 0;
+  translate: 0 calc(var(--p) * (88px - var(--win-top)));
+  scale: calc(1 + (var(--grow) - 1) * var(--p));
+}
+
+.hero .hero-frame .frame-glass {
+  transform: none;
+  background: rgb(255 255 255 / 0.5);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 40px 100px -30px rgb(20 50 110 / 0.45);
+}
+
+.is-dark .hero .hero-frame .frame-glass {
+  background: rgb(40 50 70 / 0.5);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 40px 100px -30px rgb(0 0 0 / 0.7);
+}
+
+.js-motion .hero .frame-glass {
+  opacity: 0;
+  translate: 0 140px;
+  transition: opacity 1.2s var(--ease-out-strong) 0.55s, translate 1.5s var(--ease-out-strong) 0.55s;
+}
+
+.js-motion.is-loaded .hero .frame-glass {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* The horizon: a wide curve of page colour under the window. */
+.horizon {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--win-top) + 110px);
+  z-index: 1;
+  width: 220vw;
+  height: 100svh;
+  margin-left: -110vw;
+  border-radius: 50% 50% 0 0 / 22svh 22svh 0 0;
+  background: var(--bg);
+  transform: translateY(calc(var(--p) * 30svh));
+}
+
+.js-motion .horizon {
+  translate: 0 60svh;
+  transition: translate 1.4s var(--ease-out-strong) 0.2s;
+}
+
+.js-motion.is-loaded .horizon {
+  translate: 0 0;
+}
+
+/* The nav floats over the sky without its glass until the page moves. */
+.nav:not(.is-solid) {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    height: 190svh;
+  }
+
+  .hero-pin {
+    --win-top: max(560px, 70svh);
+  }
+
+  .tiles {
+    display: none;
+  }
+
+  .hero-word {
+    font-size: 42vw;
+  }
+
+  .hero .hero-frame,
+  .js-motion .hero .hero-frame,
+  .js-motion.is-loaded .hero .hero-frame {
+    --base: calc(100vw - 24px);
+    --grow: 1;
+    translate: 0 calc(var(--p) * (80px - var(--win-top)));
+  }
+
+  .horizon {
+    top: calc(var(--win-top) + 60px);
+    border-radius: 50% 50% 0 0 / 10svh 10svh 0 0;
+  }
+
+  .hero .actions {
+    flex-wrap: wrap;
+  }
+
+  .btn-big {
+    min-height: 50px;
+    padding: 0 24px;
+    font-size: 15.5px;
+  }
+
+  .sun {
+    width: 40vw;
+    height: 40vw;
+    top: 36%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud,
+  .tile {
+    animation: none;
+  }
+
+  .js-motion .tile,
+  .js-motion .hero .frame-glass,
+  .js-motion .horizon {
+    opacity: 1;
+    scale: 1;
+    translate: none;
+    transition: none;
+  }
+}

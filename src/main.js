@@ -687,22 +687,24 @@ for (const node of $$("[data-count]")) counters.observe(node);
 
 // Each frame: the nav's glass, and the hero window leaning back then settling flat.
 const nav = $(".nav");
-const heroFrame = $("[data-hero-frame]");
+const hero = $("[data-hero]");
 let lastY = 0;
 let frameTilt = -1;
 function update() {
   const y = window.scrollY;
   const vh = window.innerHeight;
-  nav.classList.toggle("is-solid", y > 24);
+  nav.classList.toggle("is-solid", y > 24 && (!hero || y > hero.offsetHeight - vh * 0.9));
   nav.classList.toggle("is-hidden", y > vh && y > lastY + 2);
   if (y < lastY - 2) nav.classList.remove("is-hidden");
   lastY = y;
-  if (heroFrame && y < vh * 1.6) {
-    const t = Math.min(1, Math.max(0, y / (vh * 0.55)));
-    const eased = 1 - Math.pow(1 - t, 3);
-    if (Math.abs(eased - frameTilt) > 0.001) {
+  // The hero's scroll: 0 at the top, 1 when its pinned stretch ends, eased.
+  if (hero && y < hero.offsetHeight + vh) {
+    const run = Math.max(1, hero.offsetHeight - vh);
+    const t = Math.min(1, Math.max(0, y / run));
+    const eased = t * t * (3 - 2 * t);
+    if (Math.abs(eased - frameTilt) > 0.0005) {
       frameTilt = eased;
-      heroFrame.style.setProperty("--tilt", String(1 - eased));
+      hero.style.setProperty("--p", eased.toFixed(4));
     }
   }
 }

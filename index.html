@@ -41,30 +41,46 @@
   </header>
 
   <main id="main">
-    <!-- The hero: a welcome that comes into focus word by word over a slow aurora,
-         and the app itself in a glass frame that settles flat as you scroll. -->
-    <section class="hero" id="top">
-      <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="hero-copy">
-        <a class="news-pill" href="#releases" data-latest-pill>
-          <span class="news-dot" aria-hidden="true"></span>
-          <span>New in <strong>Zeus %LATEST_VERSION%</strong>: first-run setup, split view and much faster search</span>
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <h1 class="hero-title" data-split>WhatsApp, <em>finally</em> at home on&nbsp;your desktop.</h1>
-        <p class="lede">A native app written in Rust for Windows, macOS and Linux. No browser inside, so it opens in a blink and stays light.</p>
-        <div class="actions">
-          <a class="btn" href="#download">Download Zeus %LATEST_VERSION%</a>
-          <a class="btn btn-quiet" href="#tour">Watch the tour</a>
+    <!-- The hero: a light-blue sky, the welcome, the name written large behind the
+         app's window, and a horizon. Scrolling lifts the words away and the window
+         grows to fill the screen (main.js sets --p from 0 to 1). -->
+    <section class="hero" id="top" data-hero>
+      <div class="hero-pin">
+        <div class="sky" aria-hidden="true">
+          <i class="sun"></i>
+          <i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="cloud c4"></i>
         </div>
-      </div>
-      <div class="hero-frame" data-hero-frame>
-        <div class="frame-glass">
-          <picture>
-            <source srcset="/img/themes/zeus-dark.webp" media="(prefers-color-scheme: dark)" data-hero-dark>
-            <img src="/img/themes/zeus-light.webp" alt="Zeus with a chat open beside the chat list" width="1600" height="936" data-hero-shot>
-          </picture>
+        <div class="tiles" aria-hidden="true">
+          <span class="tile t1"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/></svg></span>
+          <span class="tile t2"><svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></span>
+          <span class="tile t3"><svg viewBox="0 0 24 24"><path d="M5.5 4.5h3l1.5 4-2 1.5a10 10 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15 15 0 0 1 3.5 6.5a2 2 0 0 1 2-2z"/></svg></span>
+          <span class="tile t4"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M12 20.5c-1.5 0-2-1-2-2s1-2 2.5-2"/></svg></span>
+          <span class="tile t5"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V17A2.5 2.5 0 0 1 4 14.5z"/></svg></span>
+          <span class="tile t6"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
         </div>
+        <div class="hero-copy">
+          <a class="news-pill" href="#releases" data-latest-pill>
+            <span class="news-dot" aria-hidden="true"></span>
+            <span>New in <strong>Zeus %LATEST_VERSION%</strong>: first-run setup, split view and much faster search</span>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <h1 class="hero-title" data-split>WhatsApp, <em>finally</em> at home on&nbsp;your desktop.</h1>
+          <p class="lede">A native app written in Rust for Windows, macOS and Linux. No browser inside, so it opens in a blink and stays light.</p>
+          <div class="actions">
+            <a class="btn btn-big" href="#download">Download Zeus %LATEST_VERSION%</a>
+            <a class="btn btn-quiet btn-big" href="#tour">Watch the tour</a>
+          </div>
+        </div>
+        <p class="hero-word" aria-hidden="true">Zeus</p>
+        <div class="hero-frame" data-hero-frame>
+          <div class="frame-glass">
+            <picture>
+              <source srcset="/img/themes/zeus-dark.webp" media="(prefers-color-scheme: dark)" data-hero-dark>
+              <img src="/img/themes/zeus-light.webp" alt="Zeus with a chat open beside the chat list" width="1600" height="936" data-hero-shot>
+            </picture>
+          </div>
+        </div>
+        <div class="horizon" aria-hidden="true"></div>
       </div>
     </section>
 
