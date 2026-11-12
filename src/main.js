@@ -632,6 +632,7 @@ modeSwitch?.addEventListener("click", () => {
   }
   root.classList.add("is-switching");
   applyMode();
+  if (chosen === "dark") strike({ big: true });
   setTimeout(() => root.classList.remove("is-switching"), 500);
 });
 applyMode();
@@ -717,5 +718,127 @@ function loop(now) {
 
 document.fonts.ready.then(() => {
   requestAnimationFrame(() => root.classList.add("is-loaded"));
+  // Zeus announces himself: one strike on the name once it has settled,
+  // then now and then a distant one in the clouds while the sky is in view.
+  if (!reduced) {
+    setTimeout(() => strike({ big: true }), 2100);
+    const distant = () => {
+      setTimeout(() => {
+        const p = parseFloat(hero?.style.getPropertyValue("--p") || "0");
+        if (!document.hidden && p < 0.4 && window.scrollY < innerHeight) strike({ big: Math.random() < 0.25 });
+        distant();
+      }, 6000 + Math.random() * 9000);
+    };
+    distant();
+  }
 });
 requestAnimationFrame(loop);
+
+// Thunder: Zeus's bolt. A jagged path grown by midpoint displacement, drawn in
+// a blink behind the name, with a flash over the sky. Big strikes hit the name;
+// small ones flicker far off in the clouds.
+function boltPoints(x0, y0, x1, y1, rough, depth) {
+  let pts = [[x0, y0], [x1, y1]];
+  for (let d = 0; d < depth; d++) {
+    const next = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      const [ax, ay] = pts[i - 1];
+      const [bx, by] = pts[i];
+      const len = Math.hypot(bx - ax, by - ay);
+      const off = (Math.random() - 0.5) * len * rough;
+      // Push the midpoint sideways from the segment.
+      const nx = -(by - ay) / (len || 1);
+      const ny = (bx - ax) / (len || 1);
+      next.push([(ax + bx) / 2 + nx * off, (ay + by) / 2 + ny * off], pts[i]);
+    }
+    pts = next;
+  }
+  return pts;
+}
+
+const toPath = (pts) => pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("");
+
+const bolts = $("[data-bolts]");
+const flash = $("[data-flash]");
+const heroWord = $(".hero-word");
+let striking = false;
+
+function strike({ big = false } = {}) {
+  if (reduced || !bolts || striking) return;
+  const box = bolts.getBoundingClientRect();
+  if (!box.width || box.bottom < 0) return;
+  striking = true;
+  const w = box.width;
+  const h = box.height;
+  bolts.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  bolts.replaceChildren();
+
+  let x0, y0, x1, y1;
+  if (big && heroWord) {
+    // Down from the top of the sky onto the name.
+    const r = heroWord.getBoundingClientRect();
+    x1 = r.left - box.left + r.width * (0.25 + Math.random() * 0.5);
+    y1 = r.top - box.top + r.height * 0.42;
+    x0 = x1 + (Math.random() - 0.5) * w * 0.35;
+    y0 = -20;
+  } else {
+    // Far off: short, thin, high in the clouds at one side.
+    const side = Math.random() < 0.5 ? 0.12 + Math.random() * 0.2 : 0.68 + Math.random() * 0.2;
+    x0 = w * side;
+    y0 = h * (0.04 + Math.random() * 0.1);
+    x1 = x0 + (Math.random() - 0.5) * w * 0.12;
+    y1 = y0 + h * (0.22 + Math.random() * 0.18);
+  }
+
+  const ns = "http://www.w3.org/2000/svg";
+  const add = (d, cls) => {
+    const path = document.createElementNS(ns, "path");
+    path.setAttribute("d", d);
+    path.setAttribute("class", cls);
+    bolts.append(path);
+    return path;
+  };
+  const main = boltPoints(x0, y0, x1, y1, 0.42, big ? 6 : 5);
+  const paths = [add(toPath(main), big ? "bolt bolt-big" : "bolt")];
+  // A few forks off the main channel.
+  const forks = big ? 3 : 1;
+  for (let f = 0; f < forks; f++) {
+    const i = Math.floor(main.length * (0.2 + Math.random() * 0.5));
+    const [fx, fy] = main[i];
+    const reach = (y1 - y0) * (0.18 + Math.random() * 0.22);
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const fork = boltPoints(fx, fy, fx + dir * reach * 0.7, fy + reach, 0.5, 4);
+    paths.push(add(toPath(fork), "bolt bolt-fork"));
+  }
+
+  bolts.classList.toggle("is-far", !big);
+  // Grow each channel downwards in a blink.
+  for (const path of paths) {
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = `${len}`;
+    path.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: big ? 110 : 90, easing: "cubic-bezier(0.2, 0, 0.4, 1)", fill: "both" });
+  }
+  // The flicker: lit, dims, lit again, gone.
+  const glow = big ? [1, 0.25, 1, 0.55, 0.85, 0] : [0.7, 0.15, 0.6, 0];
+  bolts.animate(
+    glow.map((opacity) => ({ opacity })),
+    { duration: big ? 900 : 600, easing: "linear", fill: "both" },
+  ).finished.then(() => {
+    bolts.replaceChildren();
+    striking = false;
+  });
+  if (flash) {
+    flash.style.setProperty("--fx", `${((x1 / w) * 100).toFixed(1)}%`);
+    flash.style.setProperty("--fy", `${((y1 / h) * 100).toFixed(1)}%`);
+    const peak = big ? 1 : 0.35;
+    flash.animate(
+      [{ opacity: 0 }, { opacity: peak, offset: 0.06 }, { opacity: peak * 0.2, offset: 0.2 }, { opacity: peak * 0.7, offset: 0.3 }, { opacity: 0 }],
+      { duration: big ? 1100 : 700, easing: "ease-out" },
+    );
+  }
+  if (big && heroWord) {
+    heroWord.classList.remove("is-struck");
+    void heroWord.offsetWidth;
+    heroWord.classList.add("is-struck");
+  }
+}
