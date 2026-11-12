@@ -1,17 +1,30 @@
-// The themes the picker offers, each shot from the app's demo in both modes
-// (public/img/themes/<id>-<mode>.webp). Colours are each shot's window ground
-// and outgoing bubble, sampled for the swatches.
+// The themes the app's Appearance card offers (ChatTheme::ALL in the Zeus repo),
+// in its order: the three looks, then six ready-made themes. Each is shot from the
+// app's demo in both modes (public/img/themes/<id>-<mode>.webp). `chat` is the
+// window's ground and `accent` its own accent, as the app's swatches draw them:
+// a disc of the one with a dot of the other.
 export const THEMES = [
-  { id: "zeus", name: "Zeus", light: { bg: "#f7f7f7", accent: "#d4d4d4" }, dark: { bg: "#0d0d0d", accent: "#333333" } },
-  { id: "whatsapp", name: "WhatsApp", light: { bg: "#efeae2", accent: "#d9fdd3" }, dark: { bg: "#0b141a", accent: "#005c4b" } },
-  { id: "dracula", name: "Dracula", light: { bg: "#f7f4e4", accent: "#e6e0ed" }, dark: { bg: "#252531", accent: "#5b5078" } },
-  { id: "nord", name: "Nord", light: { bg: "#e4e8f0", accent: "#c9d6e3" }, dark: { bg: "#2b303a", accent: "#465765" } },
-  { id: "tokyo-night", name: "Tokyo Night", light: { bg: "#d5d9e2", accent: "#bccbe8" }, dark: { bg: "#191922", accent: "#323d59" } },
-  { id: "catppuccin", name: "Catppuccin", light: { bg: "#e7eaf0", accent: "#e5d8f8" }, dark: { bg: "#1b1b2a", accent: "#463f5c" } },
-  { id: "gruvbox", name: "Gruvbox", light: { bg: "#f5e8bf", accent: "#d4dfcc" }, dark: { bg: "#232425", accent: "#434c49" } },
-  { id: "rose-pine", name: "Rosé Pine", light: { bg: "#f7f0e8", accent: "#ecdde4" }, dark: { bg: "#171522", accent: "#49405e" } },
-  { id: "solarized", name: "Solarized", light: { bg: "#f7f0dd", accent: "#dce8eb" }, dark: { bg: "#002531", accent: "#0c4560" } },
-  { id: "kanagawa", name: "Kanagawa", light: { bg: "#ede6b6", accent: "#dcddcb" }, dark: { bg: "#1b1b23", accent: "#3b4359" } },
-  { id: "everforest", name: "Everforest", light: { bg: "#f4efda", accent: "#e9e8c2" }, dark: { bg: "#283035", accent: "#3e4a47" } },
-  { id: "flexoki", name: "Flexoki", light: { bg: "#f5f2e7", accent: "#f4e2d3" }, dark: { bg: "#0d0c0c", accent: "#52321e" } },
+  { id: "zeus", name: "Zeus", light: { chat: "#f7f7f7", accent: "#1a1a1a" }, dark: { chat: "#0d0d0d", accent: "#f4f4f4" } },
+  { id: "whatsapp", name: "WhatsApp", light: { chat: "#efeae2", accent: "#25d366" }, dark: { chat: "#0b141a", accent: "#21c063" } },
+  { id: "messages", name: "Messages", light: { chat: "#ffffff", accent: "#0a84ff" }, dark: { chat: "#1e1e1e", accent: "#0a84ff" } },
+  { id: "vercel", name: "Vercel", light: { chat: "#ffffff", accent: "#171717" }, dark: { chat: "#0a0a0a", accent: "#ededed" } },
+  { id: "catppuccin", name: "Catppuccin", light: { chat: "#e7eaf0", accent: "#8839ef" }, dark: { chat: "#1b1b2a", accent: "#cba6f7" } },
+  { id: "dracula", name: "Dracula", light: { chat: "#f7f4e4", accent: "#a87de0" }, dark: { chat: "#252531", accent: "#bd93f9" } },
+  { id: "nord", name: "Nord", light: { chat: "#e4e8f0", accent: "#5e81ac" }, dark: { chat: "#2b303a", accent: "#88c0d0" } },
+  { id: "gruvbox", name: "Gruvbox", light: { chat: "#f5e8bf", accent: "#af3a03" }, dark: { chat: "#232425", accent: "#fe8019" } },
+  { id: "solarized", name: "Solarized", light: { chat: "#f7f0dd", accent: "#268bd2" }, dark: { chat: "#002531", accent: "#2aa198" } },
+];
+
+// The app's named accents (Accent::ALL), macOS's system colours in Dark Aqua.
+// "Theme" keeps the theme's own.
+export const ACCENTS = [
+  { id: "theme", name: "Theme's own", rgb: null },
+  { id: "red", name: "Red", rgb: "#ff453a" },
+  { id: "orange", name: "Orange", rgb: "#ff9f0a" },
+  { id: "yellow", name: "Yellow", rgb: "#ffd60a" },
+  { id: "green", name: "Green", rgb: "#30d158" },
+  { id: "teal", name: "Teal", rgb: "#40c8e0" },
+  { id: "blue", name: "Blue", rgb: "#0a84ff" },
+  { id: "purple", name: "Purple", rgb: "#bf5af2" },
+  { id: "pink", name: "Pink", rgb: "#ff378f" },
 ];

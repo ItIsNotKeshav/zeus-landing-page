@@ -366,6 +366,8 @@ export class Sky {
       u.uMix.value = 0;
       this.mixSpeed = quick || this.reduced ? 12 : 3.2;
       this.screenKey = key;
+    }).catch(() => {
+      // A missing shot keeps the screen as it was.
     });
   }
 

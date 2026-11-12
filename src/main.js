@@ -1,6 +1,6 @@
 import Lenis from "lenis";
 import { Sky } from "./scene.js";
-import { THEMES } from "./themes.js";
+import { ACCENTS, THEMES } from "./themes.js";
 import { REPO, fromApi, renderPane, renderRow, version } from "./releases.js";
 
 const root = document.documentElement;
@@ -222,47 +222,100 @@ window.addEventListener("pointermove", (event) => {
   pointer.y = (event.clientY / window.innerHeight) * 2 - 1;
 });
 
-// Theme picker: the one live thing.
+// Theme picker: the app's Appearance card. The mode pill, the accents, the themes
+// as discs of their ground with a dot of their accent; the window wears the pick.
+const darkScheme = matchMedia("(prefers-color-scheme: dark)");
+// Accent stills exist only once shot (public/img/themes/accents/).
+const ACCENT_STILLS = false;
+const pickState = { theme: THEMES[0], mode: "dark", accent: ACCENTS[0] };
 let picked = "zeus-dark";
-let pickedTheme = THEMES[0];
-let pickedMode = "dark";
 const themeGroup = $('[data-picker="theme"]');
+const accentGroup = $('[data-picker="accent"]');
+const modeGroup = $('[data-picker="mode"]');
 const status = $(".picker-status");
+const resolvedMode = () => (pickState.mode === "auto" ? (darkScheme.matches ? "dark" : "light") : pickState.mode);
 for (const theme of THEMES) {
   const button = document.createElement("button");
   button.type = "button";
+  button.setAttribute("role", "radio");
   button.dataset.theme = theme.id;
-  button.setAttribute("aria-pressed", String(theme === pickedTheme));
-  button.innerHTML = `<span class="swatch" aria-hidden="true"><i></i><i></i></span><span></span>`;
-  button.lastChild.textContent = theme.name;
+  button.title = theme.name;
+  button.setAttribute("aria-label", theme.name);
   themeGroup.append(button);
 }
-function paintSwatches() {
-  for (const button of $$("button", themeGroup)) {
-    const theme = THEMES.find((t) => t.id === button.dataset.theme);
-    const colours = theme[pickedMode];
-    button.style.setProperty("--sw-bg", colours.bg);
-    button.style.setProperty("--sw-accent", colours.accent);
+if (ACCENT_STILLS) {
+  accentGroup.hidden = false;
+  for (const accent of ACCENTS) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("role", "radio");
+    button.dataset.accent = accent.id;
+    button.title = accent.name;
+    button.setAttribute("aria-label", accent.name);
+    if (accent.rgb) button.style.setProperty("--dot", accent.rgb);
+    else button.classList.add("is-own");
+    accentGroup.append(button);
   }
 }
 function pick() {
-  picked = `${pickedTheme.id}-${pickedMode}`;
-  for (const button of $$("button", themeGroup)) button.setAttribute("aria-pressed", String(button.dataset.theme === pickedTheme.id));
-  for (const button of $$("[data-mode]")) button.setAttribute("aria-pressed", String(button.dataset.mode === pickedMode));
-  paintSwatches();
-  status.textContent = `Showing ${pickedTheme.name}, ${pickedMode}.`;
+  const mode = resolvedMode();
+  const { theme, accent } = pickState;
+  picked = accent.rgb ? `accents/${theme.id}-${mode}-${accent.id}` : `${theme.id}-${mode}`;
+  for (const button of $$("button", themeGroup)) {
+    const t = THEMES.find((x) => x.id === button.dataset.theme);
+    button.style.setProperty("--chat", t[mode].chat);
+    button.style.setProperty("--dot", accent.rgb || t[mode].accent);
+    button.setAttribute("aria-checked", String(t === theme));
+    button.tabIndex = t === theme ? 0 : -1;
+  }
+  for (const button of $$("button", accentGroup)) {
+    const on = button.dataset.accent === accent.id;
+    button.setAttribute("aria-checked", String(on));
+    button.tabIndex = on ? 0 : -1;
+    if (button.classList.contains("is-own")) button.style.setProperty("--dot", theme[mode].accent);
+  }
+  const modes = $$("button", modeGroup);
+  for (const button of modes) {
+    const on = button.dataset.mode === pickState.mode;
+    button.setAttribute("aria-checked", String(on));
+    button.tabIndex = on ? 0 : -1;
+  }
+  modeGroup.style.setProperty("--at", String(modes.findIndex((b) => b.dataset.mode === pickState.mode)));
+  const accentText = accent.rgb ? `, ${accent.name.toLowerCase()} accent` : "";
+  status.textContent = `${theme.name}, ${pickState.mode === "auto" ? `auto (${mode} for you)` : mode}${accentText}.`;
   $("[data-theme-still]").src = `/img/themes/${picked}.webp`;
 }
 themeGroup.addEventListener("click", (event) => {
   const button = event.target.closest("button");
   if (!button) return;
-  pickedTheme = THEMES.find((t) => t.id === button.dataset.theme);
+  pickState.theme = THEMES.find((t) => t.id === button.dataset.theme);
   pick();
 });
-for (const button of $$("[data-mode]")) {
-  button.addEventListener("click", () => {
-    pickedMode = button.dataset.mode;
-    pick();
+accentGroup.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  pickState.accent = ACCENTS.find((a) => a.id === button.dataset.accent);
+  pick();
+});
+modeGroup.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  pickState.mode = button.dataset.mode;
+  pick();
+});
+darkScheme.addEventListener("change", () => pickState.mode === "auto" && pick());
+// Arrow keys move along each row, as radio groups do.
+for (const group of [themeGroup, accentGroup, modeGroup]) {
+  group.addEventListener("keydown", (event) => {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+    if (!step) return;
+    const buttons = $$("button", group);
+    const at = buttons.indexOf(document.activeElement);
+    if (at < 0) return;
+    event.preventDefault();
+    const next = buttons[(at + step + buttons.length) % buttons.length];
+    next.focus();
+    next.click();
   });
 }
 pick();
@@ -274,7 +327,7 @@ if (sky) {
       if (!entries.some((entry) => entry.isIntersecting)) return;
       observer.disconnect();
       const queue = THEMES.flatMap((t) => [`${t.id}-dark`, `${t.id}-light`]);
-      const next = () => queue.length && sky.texture(queue.shift()).finally(() => setTimeout(next, 60));
+      const next = () => queue.length && sky.texture(queue.shift()).catch(() => {}).finally(() => setTimeout(next, 60));
       next();
     },
     { rootMargin: "100% 0px" },
@@ -351,6 +404,260 @@ for (const button of $$(".feature-col button")) {
   button.addEventListener("focus", show);
   button.addEventListener("click", show);
 }
+
+// Footer: Zeus says goodbye in a chat, and a pile of the demo's stickers to throw about.
+const fcLog = $("[data-fc-log]");
+const fcStatus = $("[data-fc-status]");
+const JOKES = [
+  "Why did the browser tab join a gym? To lose a gigabyte.",
+  "An Electron app walks into a bar. It orders fourteen processes.",
+  "My memory use is so low I sometimes forget I'm running.",
+  "What does a bolt of lightning say when it's done? That was quick.",
+  "I'd tell you a joke about the borrow checker, but you'd only get to use it once.",
+  "How many Zeus windows does it take to change a light bulb? One. It opens in a blink.",
+];
+let jokeAt = Math.floor(Math.random() * JOKES.length);
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, reduced ? 0 : ms));
+function bubble(text, own = false) {
+  const node = document.createElement("p");
+  node.className = `fc-bubble${own ? " is-own" : ""}`;
+  node.textContent = text;
+  fcLog.append(node);
+  while (fcLog.children.length > 6) fcLog.firstElementChild.remove();
+  return node;
+}
+let typingBusy = false;
+async function say(lines) {
+  typingBusy = true;
+  for (const line of lines) {
+    fcStatus.textContent = "typing…";
+    const dots = document.createElement("p");
+    dots.className = "fc-bubble fc-typing";
+    dots.innerHTML = "<i></i><i></i><i></i>";
+    dots.setAttribute("aria-label", "Zeus is typing");
+    fcLog.append(dots);
+    await wait(520 + line.length * 12);
+    dots.remove();
+    bubble(line);
+    await wait(260);
+  }
+  fcStatus.textContent = "online";
+  typingBusy = false;
+}
+new IntersectionObserver(
+  (entries, observer) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    observer.disconnect();
+    say(["Oh hey, you made it to the bottom.", "Zeus is free, open source and light on memory. Want a copy?"]);
+  },
+  { threshold: 0.4 },
+).observe($("[data-footer-chat]"));
+$("[data-joke]").addEventListener("click", async () => {
+  if (typingBusy) return;
+  bubble("Tell me a joke", true);
+  await wait(250);
+  jokeAt = (jokeAt + 1) % JOKES.length;
+  say([JOKES[jokeAt]]);
+});
+
+// The sticker pit: drop them in when it comes into view, then drag and throw.
+const pit = $("[data-pit]");
+const STICKERS = [
+  ["astronaut", "brb, in orbit"],
+  ["cat", "5 more minutes"],
+  ["frog", "LGTM"],
+  ["goat", "nope."],
+  ["owl", "who pushed to main?"],
+  ["pug", "is it merged yet?"],
+  ["raccoon", "found the bug"],
+];
+const bodies = STICKERS.map(([name, caption], i) => {
+  const img = document.createElement("img");
+  img.src = `/img/stickers/${name}.webp`;
+  img.alt = `Sticker: ${caption}`;
+  img.draggable = false;
+  img.className = "pit-sticker";
+  pit.append(img);
+  return { img, x: 0, y: 0, vx: 0, vy: 0, a: (Math.random() - 0.5) * 0.6, va: 0, r: 0, held: false, i };
+});
+let pitW = 0;
+let pitH = 0;
+let pitRunning = false;
+let pitDropped = false;
+function pitSize() {
+  pitW = pit.clientWidth;
+  pitH = pit.clientHeight;
+  const size = Math.min(150, Math.max(84, pitW / 8));
+  for (const b of bodies) {
+    b.r = size / 2;
+    b.img.style.width = b.img.style.height = `${size}px`;
+  }
+}
+function pitDraw() {
+  for (const b of bodies) b.img.style.transform = `translate(${b.x - b.r}px, ${b.y - b.r}px) rotate(${b.a}rad)`;
+}
+function pitStep(dt) {
+  const g = 2400;
+  let moving = false;
+  for (const b of bodies) {
+    if (b.held) {
+      moving = true;
+      continue;
+    }
+    b.vy += g * dt;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    b.a += b.va * dt;
+    // Walls and floor, with a little bounce and rolling friction.
+    if (b.y + b.r > pitH) {
+      b.y = pitH - b.r;
+      b.vy *= -0.38;
+      b.vx *= 0.9;
+      b.va = b.vx / b.r;
+      if (Math.abs(b.vy) < 40) b.vy = 0;
+    }
+    if (b.x - b.r < 0) {
+      b.x = b.r;
+      b.vx = Math.abs(b.vx) * 0.5;
+    }
+    if (b.x + b.r > pitW) {
+      b.x = pitW - b.r;
+      b.vx = -Math.abs(b.vx) * 0.5;
+    }
+    b.va *= 0.985;
+    if (Math.abs(b.vx) > 4 || Math.abs(b.vy) > 4 || b.y + b.r < pitH - 1) moving = true;
+  }
+  // Stickers push each other apart as circles.
+  for (let k = 0; k < 3; k++) {
+    for (let i = 0; i < bodies.length; i++) {
+      for (let j = i + 1; j < bodies.length; j++) {
+        const p = bodies[i];
+        const q = bodies[j];
+        const dx = q.x - p.x;
+        const dy = q.y - p.y;
+        const min = (p.r + q.r) * 0.86;
+        const d2 = dx * dx + dy * dy;
+        if (d2 >= min * min || d2 === 0) continue;
+        const d = Math.sqrt(d2);
+        const push = (min - d) / 2;
+        const nx = dx / d;
+        const ny = dy / d;
+        const pw = p.held ? 0 : q.held ? 2 : 1;
+        const qw = q.held ? 0 : p.held ? 2 : 1;
+        p.x -= nx * push * pw;
+        p.y -= ny * push * pw;
+        q.x += nx * push * qw;
+        q.y += ny * push * qw;
+        const rel = (q.vx - p.vx) * nx + (q.vy - p.vy) * ny;
+        if (rel < 0) {
+          const impulse = -rel * 0.6;
+          if (!p.held) {
+            p.vx -= nx * impulse * 0.5;
+            p.vy -= ny * impulse * 0.5;
+          }
+          if (!q.held) {
+            q.vx += nx * impulse * 0.5;
+            q.vy += ny * impulse * 0.5;
+          }
+        }
+      }
+    }
+  }
+  return moving;
+}
+let pitLast = 0;
+function pitLoop(now) {
+  const dt = Math.min(1 / 30, (now - pitLast) / 1000 || 1 / 60);
+  pitLast = now;
+  let moving = false;
+  for (let s = 0; s < 2; s++) moving = pitStep(dt / 2) || moving;
+  pitDraw();
+  if (moving) requestAnimationFrame(pitLoop);
+  else pitRunning = false;
+}
+function pitWake() {
+  if (pitRunning) return;
+  pitRunning = true;
+  pitLast = performance.now();
+  requestAnimationFrame(pitLoop);
+}
+function pitDrop() {
+  pitSize();
+  bodies.forEach((b, i) => {
+    if (reduced) {
+      b.x = ((i + 0.5) / bodies.length) * pitW;
+      b.y = pitH - b.r;
+      return;
+    }
+    b.x = b.r + Math.random() * (pitW - 2 * b.r);
+    b.y = -b.r - i * b.r * 1.6;
+    b.vx = (Math.random() - 0.5) * 300;
+    b.vy = 0;
+    b.va = (Math.random() - 0.5) * 4;
+  });
+  pitDraw();
+  pit.classList.add("is-live");
+  if (!reduced) pitWake();
+}
+new IntersectionObserver(
+  (entries) => {
+    if (!pitDropped && entries.some((entry) => entry.isIntersecting)) {
+      pitDropped = true;
+      pitDrop();
+    }
+  },
+  { threshold: 0.3 },
+).observe(pit);
+new ResizeObserver(() => {
+  if (!pitDropped) return;
+  const before = pitW;
+  pitSize();
+  for (const b of bodies) b.x = Math.min(pitW - b.r, (b.x / (before || pitW)) * pitW);
+  pitDraw();
+  if (!reduced) pitWake();
+}).observe(pit);
+// Drag and throw.
+let grab = null;
+pit.addEventListener("pointerdown", (event) => {
+  const b = bodies.find((x) => x.img === event.target);
+  if (!b || reduced) return;
+  event.preventDefault();
+  const r = pit.getBoundingClientRect();
+  grab = { b, id: event.pointerId, ox: event.clientX - r.left - b.x, oy: event.clientY - r.top - b.y, t: performance.now(), px: event.clientX, py: event.clientY };
+  b.held = true;
+  b.vx = b.vy = 0;
+  b.img.classList.add("is-held");
+  pit.setPointerCapture(event.pointerId);
+  pitWake();
+});
+pit.addEventListener("pointermove", (event) => {
+  if (!grab || event.pointerId !== grab.id) return;
+  const r = pit.getBoundingClientRect();
+  const now = performance.now();
+  const dt = Math.max(1, now - grab.t) / 1000;
+  const { b } = grab;
+  b.vx = b.vx * 0.5 + ((event.clientX - grab.px) / dt) * 0.5;
+  b.vy = b.vy * 0.5 + ((event.clientY - grab.py) / dt) * 0.5;
+  b.x = Math.min(pitW - b.r, Math.max(b.r, event.clientX - r.left - grab.ox));
+  b.y = Math.min(pitH - b.r, event.clientY - r.top - grab.oy);
+  b.a += (event.clientX - grab.px) * 0.004;
+  grab.t = now;
+  grab.px = event.clientX;
+  grab.py = event.clientY;
+});
+const release = (event) => {
+  if (!grab || event.pointerId !== grab.id) return;
+  const { b } = grab;
+  b.held = false;
+  b.vx = Math.max(-2600, Math.min(2600, b.vx));
+  b.vy = Math.max(-2600, Math.min(2600, b.vy));
+  b.va = b.vx / (b.r * 2);
+  b.img.classList.remove("is-held");
+  grab = null;
+  pitWake();
+};
+pit.addEventListener("pointerup", release);
+pit.addEventListener("pointercancel", release);
 
 // Releases: a list of versions beside the open one, like a chat list beside a chat.
 const rb = $("[data-rb]");
