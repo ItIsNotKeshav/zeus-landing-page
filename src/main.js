@@ -1,11 +1,9 @@
 import Lenis from "lenis";
-import { Sky } from "./scene.js";
 import { ACCENTS, THEMES } from "./themes.js";
 import { REPO, fromApi, renderPane, renderRow, version } from "./releases.js";
 
 const root = document.documentElement;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const lite = matchMedia("(max-width: 900px)").matches || (navigator.hardwareConcurrency || 8) <= 4;
 const $ = (selector, el = document) => el.querySelector(selector);
 const $$ = (selector, el = document) => [...el.querySelectorAll(selector)];
 root.classList.add("js-motion");
@@ -41,28 +39,6 @@ for (const line of document.querySelectorAll("[data-split]")) {
   wrap(line);
 }
 
-const WINDOW_ASPECT = 936 / 1600;
-const TAU = Math.PI * 2;
-
-const el = {
-  nav: $(".nav"),
-  unveil: $(".unveil"),
-  stats: $(".stats"),
-  storm: $(".storm"),
-  themes: $(".themes"),
-  calls: $(".calls"),
-  footer: $(".footer"),
-  slotHero: $('[data-slot="hero"]'),
-  monument: $(".hero .monument"),
-  stageHero: $('[data-stage="hero"]'),
-  slotFooter: $('[data-slot="footer"]'),
-  stageUnveil: $('[data-stage="unveil"]'),
-  stageStats: $('[data-stage="stats"]'),
-  stageStorm: $('[data-stage="storm"]'),
-  stageThemes: $('[data-stage="themes"]'),
-  flash: $(".flash"),
-};
-
 // Smooth scrolling, unless the reader asked for less motion.
 // A fixed-length glide per wheel step with an expo ease-out reads calmer than lerp,
 // and touch keeps the device's own momentum.
@@ -77,150 +53,6 @@ const lenis = reduced
       syncTouch: false,
       anchors: { duration: 1.4 },
     });
-
-let sky = null;
-try {
-  sky = new Sky($("#sky"), { reduced, lite });
-  root.classList.add("has-3d");
-  sky.setScreen("zeus-light");
-  sky.texture("zeus-dark");
-  if (import.meta.env.DEV) window.__sky = sky;
-} catch (error) {
-  console.warn("Zeus: 3D is off, showing still pictures instead.", error);
-}
-
-// Section positions in the document, measured on layout changes rather than every frame.
-const m = {};
-let stops = [];
-function measure() {
-  const vh = window.innerHeight;
-  for (const key of ["unveil", "stats", "storm", "themes", "calls", "footer"]) {
-    const r = el[key].getBoundingClientRect();
-    m[key] = { top: r.top + window.scrollY, h: r.height };
-  }
-  m.max = Math.max(1, document.documentElement.scrollHeight - vh);
-  m.strike = m.storm.top + 0.55 * (m.storm.h - vh);
-  m.darkScreenUntil = m.storm.top + m.storm.h - vh;
-  stops = [
-    ["hero", 0],
-    ["unveilA", m.unveil.top],
-    ["unveilB", m.unveil.top + m.unveil.h - vh],
-    ["stats", m.stats.top + m.stats.h / 2 - vh / 2],
-    ["stormA", m.storm.top],
-    ["stormB", m.storm.top + 0.42 * (m.storm.h - vh)],
-    ["stormC", m.storm.top + m.storm.h - vh],
-    ["themes", m.themes.top + m.themes.h / 2 - vh / 2],
-    ["gone", m.calls.top],
-    ["footerIn", m.footer.top - vh],
-    ["footer", m.max],
-  ];
-  // Keep them in order whatever the layout does.
-  for (let i = 1; i < stops.length; i++) stops[i][1] = Math.max(stops[i][1], stops[i - 1][1] + 1);
-}
-
-const fit = (node) => {
-  const r = node.getBoundingClientRect();
-  return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width };
-};
-const slot = (node) => {
-  const r = node.getBoundingClientRect();
-  return { x: r.left + r.width / 2, y: r.top + r.height / 2, size: r.height };
-};
-const badge = (win) => {
-  const size = Math.min(150, Math.max(52, win.w * 0.15));
-  return { x: win.x - win.w / 2 + size * 0.2, y: win.y - (win.w * WINDOW_ASPECT) / 2 + size * 0.05, size };
-};
-
-// Where everything sits at each stop. Rects are read live, so a stop moves with its section.
-function pose(name) {
-  const vh = window.innerHeight;
-  const hidden = { opacity: 0, z: -6, rx: 0, ry: 0, rz: 0 };
-  let win;
-  let tile;
-  let storm = 0;
-  let rain = 0;
-  switch (name) {
-    case "hero":
-      win = { ...fit(el.stageHero), z: 0.6, rx: 0.16, ry: 0, rz: 0, opacity: 1, aura: 1 };
-      tile = { ...slot(el.slotHero), z: 0, rx: 0, ry: 0, rz: 0, glow: 0 };
-      break;
-    case "unveilA":
-      win = { ...fit(el.stageUnveil), z: 0, rx: 0.24, ry: -0.34, rz: 0.03, opacity: 1 };
-      tile = { ...badge(win), z: 1.4, rx: 0.15, ry: 0.7, rz: 0.1, glow: 0 };
-      break;
-    case "unveilB":
-      win = { ...fit(el.stageUnveil), z: 0, rx: 0.04, ry: -0.12, rz: 0, opacity: 1 };
-      tile = { ...badge(win), z: 1.4, rx: 0.05, ry: TAU - 0.3, rz: 0, glow: 0 };
-      break;
-    case "stats":
-      win = { ...fit(el.stageStats), z: 0, rx: 0.06, ry: -0.44, rz: 0, opacity: 1 };
-      tile = { ...badge(win), z: 1.6, rx: 0.1, ry: TAU - 0.5, rz: 0.06, glow: 0 };
-      break;
-    case "stormA":
-      win = { ...fit(el.stageStorm), z: 0, rx: 0.03, ry: -0.08, rz: 0, opacity: 1 };
-      tile = { ...badge(win), z: 1.4, rx: 0, ry: TAU, rz: 0, glow: 0 };
-      storm = 0.1;
-      break;
-    case "stormB":
-    case "stormC":
-      win = { ...fit(el.stageStorm), z: 0, rx: 0.02, ry: -0.04, rz: 0, opacity: 1 };
-      tile = { ...badge(win), z: 1.4, rx: 0, ry: TAU, rz: 0, glow: name === "stormB" ? 0.3 : 0.12 };
-      storm = 1;
-      rain = 1;
-      break;
-    case "themes":
-      win = { ...fit(el.stageThemes), z: 0, rx: 0.05, ry: -0.2, rz: 0, opacity: 1 };
-      tile = { ...badge(win), z: 1.4, rx: 0.08, ry: TAU - 0.35, rz: 0.05, glow: 0.08 };
-      storm = 1;
-      rain = 0.3;
-      break;
-    case "gone":
-      win = { ...fit(el.stageThemes), ...hidden, ry: -0.7, opacity: 0 };
-      tile = { ...badge(win), z: -3, rx: 0, ry: TAU - 0.35, rz: 0, glow: 0 };
-      tile.y -= vh * 0.2;
-      storm = 1;
-      rain = 0.2;
-      break;
-    default:
-      // footerIn and footer: dawn, and the tile back in the name.
-      win = { x: window.innerWidth / 2, y: vh * 1.5, w: 10, ...hidden };
-      tile = { ...slot(el.slotFooter), z: 0, rx: 0, ry: TAU, rz: 0, glow: 0 };
-  }
-  win.aura ??= 0;
-  return { win, tile, storm, rain };
-}
-
-const mix = (a, b, t) => a + (b - a) * t;
-const ease = (t) => t * t * (3 - 2 * t);
-function blend(a, b, t) {
-  const out = {};
-  for (const key in a) out[key] = typeof a[key] === "number" ? mix(a[key], b[key], t) : a[key];
-  return out;
-}
-
-function stateAt(y) {
-  let i = 0;
-  while (i < stops.length - 2 && y >= stops[i + 1][1]) i++;
-  const [nameA, atA] = stops[i];
-  const [nameB, atB] = stops[i + 1];
-  const t = ease(Math.min(1, Math.max(0, (y - atA) / (atB - atA))));
-  const a = pose(nameA);
-  const b = pose(nameB);
-  return {
-    win: blend(a.win, b.win, t),
-    tile: blend(a.tile, b.tile, t),
-    storm: mix(a.storm, b.storm, t),
-    rain: mix(a.rain, b.rain, t),
-  };
-}
-
-// Pointer, eased, for a little parallax on desktop.
-const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
-window.addEventListener("pointermove", (event) => {
-  if (event.pointerType !== "mouse") return;
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = (event.clientY / window.innerHeight) * 2 - 1;
-});
 
 // Theme picker: the app's Appearance card. The mode pill, the accents, the themes
 // as discs of their ground with a dot of their accent; the window wears the pick.
@@ -283,7 +115,22 @@ function pick() {
   modeGroup.style.setProperty("--at", String(modes.findIndex((b) => b.dataset.mode === pickState.mode)));
   const accentText = accent.rgb ? `, ${accent.name.toLowerCase()} accent` : "";
   status.textContent = `${theme.name}, ${pickState.mode === "auto" ? `auto (${mode} for you)` : mode}${accentText}.`;
-  $("[data-theme-still]").src = `/img/themes/${picked}.webp`;
+  // Swap the window's picture once the next one is decoded, with a soft fade.
+  const still = $("[data-theme-still]");
+  const next = `/img/themes/${picked}.webp`;
+  if (still.getAttribute("src") !== next) {
+    const want = picked;
+    const pre = new Image();
+    pre.src = next;
+    pre
+      .decode()
+      .catch(() => {})
+      .then(() => {
+        if (want !== picked) return;
+        still.src = next;
+        if (!reduced) still.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 280, easing: "cubic-bezier(0.33, 1, 0.68, 1)" });
+      });
+  }
 }
 themeGroup.addEventListener("click", (event) => {
   const button = event.target.closest("button");
@@ -319,20 +166,6 @@ for (const group of [themeGroup, accentGroup, modeGroup]) {
   });
 }
 pick();
-
-// Load the other themes once the reader gets near them.
-if (sky) {
-  new IntersectionObserver(
-    (entries, observer) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      observer.disconnect();
-      const queue = THEMES.flatMap((t) => [`${t.id}-dark`, `${t.id}-light`]);
-      const next = () => queue.length && sky.texture(queue.shift()).catch(() => {}).finally(() => setTimeout(next, 60));
-      next();
-    },
-    { rootMargin: "100% 0px" },
-  ).observe(el.themes);
-}
 
 // Calls: three kinds, one plate.
 const CALLS = {
@@ -768,139 +601,119 @@ for (const node of $$("[data-reveal]")) {
   reveal.observe(node);
 }
 
-// The storm: a strike flips the page from day to night.
-let night = false;
-let lastScreen = null;
-let lastY = 0;
-let ambientAt = 4;
-let clock = 0;
-let started = performance.now();
+// Light or dark: the visitor's system, unless they pick with the nav switch.
+const modeSwitch = $("[data-mode-switch]");
+const systemDark = matchMedia("(prefers-color-scheme: dark)");
+let chosen = null;
+try {
+  chosen = localStorage.getItem("zeus-site-mode");
+} catch {
+  // Storage off: follow the system.
+}
+function applyMode() {
+  const dark = chosen ? chosen === "dark" : systemDark.matches;
+  root.classList.toggle("is-dark", dark);
+  root.classList.toggle("is-light", !dark);
+  $('meta[name="theme-color"]').content = dark ? "#080808" : "#f7f7f7";
+  modeSwitch?.setAttribute("aria-pressed", String(dark));
+  const shot = $("[data-hero-shot]");
+  const source = $("[data-hero-dark]");
+  if (shot && source) {
+    source.media = dark ? "all" : "not all";
+  }
+}
+systemDark.addEventListener("change", applyMode);
+modeSwitch?.addEventListener("click", () => {
+  chosen = root.classList.contains("is-dark") ? "light" : "dark";
+  try {
+    localStorage.setItem("zeus-site-mode", chosen);
+  } catch {
+    // Not remembered: fine for this visit.
+  }
+  root.classList.add("is-switching");
+  applyMode();
+  setTimeout(() => root.classList.remove("is-switching"), 500);
+});
+applyMode();
 
-function flashPage() {
-  if (reduced) return;
-  el.flash.style.display = "block";
-  el.flash
-    .animate(
-      [{ opacity: 0 }, { opacity: 0.42, offset: 0.08 }, { opacity: 0.05, offset: 0.2 }, { opacity: 0.22, offset: 0.32 }, { opacity: 0 }],
-      { duration: 520, easing: "ease-out" },
-    )
-    .finished.then(() => (el.flash.style.display = "none"));
+// Light and dark side by side: drag (or use the arrow keys) to move the split.
+const compare = $("[data-compare]");
+const compareRange = $("[data-compare-range]");
+if (compare && compareRange) {
+  compareRange.addEventListener("input", () => compare.style.setProperty("--s", String(compareRange.value / 100)));
+  // A gentle nudge the first time it comes into view, so the split reads as movable.
+  if (!reduced) {
+    new IntersectionObserver(
+      (entries, observer) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        const start = performance.now();
+        const sway = (now) => {
+          const t = Math.min(1, (now - start) / 1600);
+          const v = 0.5 + Math.sin(t * Math.PI * 2) * 0.14 * (1 - t);
+          compare.style.setProperty("--s", String(v));
+          if (t < 1) requestAnimationFrame(sway);
+        };
+        setTimeout(() => requestAnimationFrame(sway), 500);
+      },
+      { threshold: 0.6 },
+    ).observe(compare);
+  }
 }
 
-function update(dt) {
+// Figures count up when they arrive.
+const counters = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      counters.unobserve(entry.target);
+      const node = entry.target;
+      const to = Number(node.dataset.count);
+      const decimals = Number(node.dataset.decimals || 0);
+      if (reduced || to <= 1) continue;
+      const start = performance.now();
+      const tick = (now) => {
+        const t = Math.min(1, (now - start) / 1200);
+        const eased = 1 - Math.pow(1 - t, 4);
+        node.textContent = (to * eased).toFixed(decimals);
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  },
+  { threshold: 0.6 },
+);
+for (const node of $$("[data-count]")) counters.observe(node);
+
+// Each frame: the nav's glass, and the hero window leaning back then settling flat.
+const nav = $(".nav");
+const heroFrame = $("[data-hero-frame]");
+let lastY = 0;
+let frameTilt = -1;
+function update() {
   const y = window.scrollY;
   const vh = window.innerHeight;
-  const s = stateAt(y);
-
-  // Day or night, decided by where the strike line is.
-  const isNight = y >= m.strike;
-  if (isNight !== night) {
-    const first = lastScreen === null;
-    night = isNight;
-    root.classList.toggle("is-dark", night);
-    root.classList.toggle("is-light", !night);
-    el.storm.classList.toggle("is-night", night);
-    $('meta[name="theme-color"]').content = night ? "#0b0b0c" : "#f3f3f1";
-    if (!first && sky) {
-      sky.strike(sky.tileWorld(), { main: true });
-      flashPage();
-    }
-  }
-  const screen = y < m.strike ? "zeus-light" : y < m.darkScreenUntil ? "zeus-dark" : picked;
-  if (sky && screen !== lastScreen) {
-    const crossing = lastScreen !== null && (screen === "zeus-dark") !== (lastScreen === "zeus-dark") && (screen === "zeus-light" || lastScreen === "zeus-light");
-    if (crossing && !reduced) setTimeout(() => sky.setScreen(screen, true), 70);
-    else sky.setScreen(screen);
-  }
-  lastScreen = screen;
-
-  // Navigation: solid once the page moves, out of the way while reading down.
-  // While a 3D chapter is pinned the bar stays clear, so it never cuts a strip off
-  // the sky; nothing scrolls under it there.
-  const pinned = (key) => y >= m[key].top && y <= m[key].top + m[key].h - vh;
-  el.nav.classList.toggle("is-solid", y > 40 && !(sky && (pinned("unveil") || pinned("storm"))));
-  el.nav.classList.toggle("is-hidden", y > vh && y > lastY + 2);
-  if (y < lastY - 2) el.nav.classList.remove("is-hidden");
+  nav.classList.toggle("is-solid", y > 24);
+  nav.classList.toggle("is-hidden", y > vh && y > lastY + 2);
+  if (y < lastY - 2) nav.classList.remove("is-hidden");
   lastY = y;
-
-  if (!sky) return;
-  const showing = y < m.calls.top || y > m.footer.top - vh;
-  if (!showing) return;
-
-  // Life: the hero tile drops in, everything breathes, and the pointer leans on it.
-  clock += dt;
-  pointer.sx += (pointer.x - pointer.sx) * Math.min(1, dt * 4);
-  pointer.sy += (pointer.y - pointer.sy) * Math.min(1, dt * 4);
-  if (!reduced) {
-    const entrance = Math.min(1, (performance.now() - started) / 1600);
-    const settle = 1 - Math.pow(1 - entrance, 3);
-    // The window rises from below the fold and leans back as the page opens.
-    const rise = Math.min(1, Math.max(0, (performance.now() - started - 450) / 1500));
-    const lift = 1 - Math.pow(1 - rise, 4);
-    s.win.y += (1 - lift) * vh * 0.7;
-    s.win.rx += (1 - lift) * 0.55;
-    s.win.opacity *= Math.min(1, rise * 3);
-    s.win.aura *= Math.min(1, (performance.now() - started) / 900);
-    s.tile.y -= (1 - settle) * vh * 0.55;
-    s.tile.ry += (1 - settle) * TAU * 1.25;
-    s.tile.rx += Math.sin(clock * 0.7) * 0.07 + pointer.sy * 0.28;
-    s.tile.ry += Math.sin(clock * 0.5) * 0.16 + pointer.sx * 0.42;
-    s.win.rx += pointer.sy * 0.05;
-    s.win.ry += pointer.sx * 0.07;
-    s.win.y += Math.sin(clock * 0.9) * 3;
-
-    // The storm grumbles on its own while it is overhead.
-    if (s.storm > 0.85) {
-      ambientAt -= dt;
-      if (ambientAt <= 0) {
-        ambientAt = 4 + Math.random() * 6;
-        if (Math.random() < 0.55) sky.glow(0.15 + Math.random() * 0.7, 0.05 + Math.random() * 0.3);
-        else sky.strike(sky.pointToWorld(Math.random() * window.innerWidth, vh * (0.75 + Math.random() * 0.3), -6), { far: true });
-      }
+  if (heroFrame && y < vh * 1.6) {
+    const t = Math.min(1, Math.max(0, y / (vh * 0.55)));
+    const eased = 1 - Math.pow(1 - t, 3);
+    if (Math.abs(eased - frameTilt) > 0.001) {
+      frameTilt = eased;
+      heroFrame.style.setProperty("--tilt", String(1 - eased));
     }
   }
-  // The window passes in front of the name: hide the letters below its top edge.
-  if (y < vh * 1.5) {
-    const top = s.win.y - ((s.win.w * WINDOW_ASPECT) / 2) * Math.cos(s.win.rx);
-    const r = el.monument.getBoundingClientRect();
-    el.monument.style.clipPath = `inset(0 0 ${Math.max(0, r.bottom - top).toFixed(1)}px 0)`;
-  }
-  el.storm.style.setProperty("--day", String(1 - Math.min(1, Math.max(0, (s.storm - 0.3) / 0.3))));
-  sky.frame(dt, s);
 }
 
-// Click the storm to call down a bolt where you clicked.
-let lastBolt = 0;
-document.addEventListener("click", (event) => {
-  if (!sky || reduced || !night) return;
-  if (event.target.closest("a, button, input, label, img, .nav")) return;
-  if (!event.target.closest(".storm, .themes")) return;
-  const now = performance.now();
-  if (now - lastBolt < 350) return;
-  lastBolt = now;
-  sky.strike(sky.pointToWorld(event.clientX, event.clientY, 0));
-});
-
-let last = performance.now();
 function loop(now) {
-  const dt = Math.min(0.05, (now - last) / 1000);
-  last = now;
   lenis?.raf(now);
-  update(dt);
+  update();
   requestAnimationFrame(loop);
 }
 
-function resize() {
-  measure();
-  sky?.resize();
-}
-window.addEventListener("resize", resize);
-new ResizeObserver(() => measure()).observe(document.body);
-measure();
-
 document.fonts.ready.then(() => {
-  measure();
-  started = performance.now();
   requestAnimationFrame(() => root.classList.add("is-loaded"));
 });
 requestAnimationFrame(loop);
