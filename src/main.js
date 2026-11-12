@@ -283,7 +283,7 @@ const CALLS = {
   },
   voice: {
     src: "/img/call-voice.webp",
-    alt: "A voice call in Zeus with Hedy Lamarr, three minutes in",
+    alt: "A voice call in Zeus with Luna Starling, three minutes in",
     text: "Voice through the microphone and speaker you choose. Switch either mid-call and the call carries on.",
   },
 };
@@ -305,6 +305,28 @@ for (const button of $$("[data-call]")) {
   });
 }
 for (const call of Object.values(CALLS)) new Image().src = call.src;
+
+// The tour video: plays, muted, while it is on screen; sound is the reader's choice.
+const film = $("[data-film]");
+const filmSound = $("[data-film-sound]");
+if (film) {
+  new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting && !reduced) film.play().catch(() => {});
+        else film.pause();
+      }
+    },
+    { threshold: 0.35 },
+  ).observe(film);
+  if (reduced) film.controls = true;
+  filmSound.addEventListener("click", () => {
+    film.muted = !film.muted;
+    filmSound.setAttribute("aria-pressed", String(!film.muted));
+    filmSound.textContent = film.muted ? "Sound on" : "Sound off";
+    if (film.paused) film.play().catch(() => {});
+  });
+}
 
 // Features: point at a name to read it.
 const tip = $(".feature-tip");
