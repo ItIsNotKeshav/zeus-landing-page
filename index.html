@@ -12,7 +12,9 @@
   <meta property="og:description" content="A native WhatsApp client written in Rust. Light and dark, calls, themes, and your chats kept in an encrypted archive on your own computer.">
   <meta property="og:image" content="/og.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preload" href="/fonts/Geist.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap">
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
@@ -26,7 +28,6 @@
       <span>Zeus</span>
     </a>
     <nav class="nav-links" aria-label="Sections">
-      <a href="#new">What's new</a>
       <a href="#themes">Themes</a>
       <a href="#calls">Calls</a>
       <a href="#linking">Privacy</a>
@@ -36,23 +37,25 @@
   </header>
 
   <main id="main">
-    <!-- The name as a monument: the Z is the 3D bolt, drawn by the canvas into this slot. -->
+    <!-- The hero: a line of welcome, the name as a monument with the 3D bolt for its Z,
+         and the app's window rising over it as the page loads. -->
     <section class="hero" id="top" data-scene="hero">
-      <a class="news-pill" href="#new" data-latest-pill>
-        <span class="news-dot" aria-hidden="true"></span>
-        <span>New in <strong>Zeus %LATEST_VERSION%</strong>: first-run setup, split view and much faster search</span>
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-      <h1 class="monument" data-reveal-hero>
-        <span class="slot" data-slot="hero">Z</span>eus
-      </h1>
-      <div class="hero-foot">
-        <p class="lede">WhatsApp for your desktop, written in Rust. Native on Windows, macOS and Linux, with no browser inside.</p>
+      <div class="hero-copy">
+        <a class="news-pill" href="#releases" data-latest-pill>
+          <span class="news-dot" aria-hidden="true"></span>
+          <span>New in <strong>Zeus %LATEST_VERSION%</strong>: first-run setup, split view and much faster search</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <h1 class="hero-title" data-split>WhatsApp, <em>finally</em> at home on&nbsp;your desktop.</h1>
+        <p class="lede">Written in Rust, native on Windows, macOS and Linux, with no browser inside.</p>
         <div class="actions">
           <a class="btn" href="#download">Download Zeus %LATEST_VERSION%</a>
-          <a class="text-link" href="#releases">Release notes</a>
-          <a class="text-link" href="https://github.com/ItIsNotKeshav/Zeus">Source on GitHub</a>
+          <a class="btn btn-quiet" href="#releases">Release notes</a>
         </div>
+      </div>
+      <p class="monument" aria-hidden="true"><span class="slot" data-slot="hero">Z</span>eus</p>
+      <div class="hero-stage" data-stage="hero">
+        <img class="still" src="/img/themes/zeus-light.webp" alt="Zeus in light mode, with a chat open beside the chat list" width="1600" height="936">
       </div>
     </section>
 
@@ -154,56 +157,6 @@
       </div>
     </section>
 
-    <section class="whatsnew" id="new" aria-labelledby="new-title">
-      <div class="whatsnew-head" data-reveal>
-        <p class="eyebrow"><time datetime="%LATEST_DATE_ISO%">%LATEST_DATE%</time> · Zeus %LATEST_VERSION%</p>
-        <h2 id="new-title">New lately.</h2>
-        <p>The biggest things from the last few releases. Every change is listed under <a href="#releases">Releases</a>.</p>
-      </div>
-      <ul class="news-grid">
-        <li class="news-card news-wide" data-reveal>
-          <span class="news-ver">0.41</span>
-          <h3>A first-run setup</h3>
-          <p>A new copy of Zeus walks you through the look, your name, notifications and privacy before it shows the QR code, with a live preview beside each step. While it loads, the outline of your chats appears at once and fades into the real thing.</p>
-        </li>
-        <li class="news-card" data-reveal>
-          <span class="news-ver">0.41 <em>Experimental</em></span>
-          <h3>Split view and pop-out chats</h3>
-          <p>Open a second chat beside the first, or pull one out into its own window.</p>
-        </li>
-        <li class="news-card" data-reveal>
-          <span class="news-ver">0.41 <em>Experimental</em></span>
-          <h3>Chat bubbles</h3>
-          <p>Keep chats as floating circles over your other apps, and open one as a small chat card.</p>
-        </li>
-        <li class="news-card" data-reveal>
-          <span class="news-ver">0.41</span>
-          <h3>Search that keeps up</h3>
-          <p>Results come from an index instead of reading every message, so they arrive as you pause.</p>
-        </li>
-        <li class="news-card" data-reveal>
-          <span class="news-ver">0.41</span>
-          <h3>Sent, Delivered, Read</h3>
-          <p>Your newest message says where it is in words, not ticks.</p>
-        </li>
-        <li class="news-card" data-reveal>
-          <span class="news-ver">0.41</span>
-          <h3>Block and disappearing messages</h3>
-          <p>Block from a chat's menu, and set a chat's timer in two clicks.</p>
-        </li>
-        <li class="news-card" data-reveal>
-          <span class="news-ver">0.40</span>
-          <h3>Group calls</h3>
-          <p>Start and answer group voice and video calls, with echo cancelling on every call.</p>
-        </li>
-        <li class="news-card news-wide" data-reveal>
-          <span class="news-ver">0.36 – 0.41</span>
-          <h3>Lighter and smoother</h3>
-          <p>Idle memory fell from about 430 MB to about 125 MB in our test, the pickers open without a freeze, and photos, messages and chat rows now move on springs.</p>
-        </li>
-      </ul>
-    </section>
-
     <section class="features" id="features" aria-labelledby="features-title">
       <h2 id="features-title" data-reveal>Everything else, too.</h2>
       <div class="feature-cols">
@@ -252,7 +205,6 @@
             <li><button type="button" data-tip="Translated into ten languages, from German to Traditional Chinese.">Ten languages</button></li>
             <li><button type="button" data-tip="Two minutes of smoothness, memory, CPU and GPU, run on sample chats, never yours.">Built-in benchmark</button></li>
             <li><button type="button" data-tip="Zeus checks for new releases and installs them itself.">Updates itself</button></li>
-            <li><button type="button" data-tip="Its own installer, folders and settings, so both apps can run.">Runs beside ZapFast</button></li>
           </ul>
         </div>
         <p class="feature-tip" aria-live="polite">Choose a name to read what it does.</p>
@@ -273,21 +225,14 @@
     </section>
 
     <section class="releases" id="releases" aria-labelledby="releases-title">
-      <div class="releases-side">
-        <div class="releases-intro" data-reveal>
-          <h2 id="releases-title">Releases.</h2>
-          <p>Every version of Zeus and what it changed, newest first. Zeus checks for updates on its own and installs them, so most of this arrives without you lifting a finger.</p>
-          <p class="releases-meta"><span data-release-count>%RELEASE_COUNT%</span> releases · latest <strong data-latest-version>%LATEST_VERSION%</strong></p>
-          <div class="releases-actions">
-            <button type="button" class="chip" data-releases-toggle="open">Open all</button>
-            <button type="button" class="chip" data-releases-toggle="close">Close all</button>
-            <a class="text-link" href="https://github.com/ItIsNotKeshav/Zeus/releases">All on GitHub</a>
-          </div>
-        </div>
+      <div class="releases-intro" data-reveal>
+        <h2 id="releases-title">What changed, release by release.</h2>
+        <p>Pick a version to read its notes. Zeus updates itself, so the newest one is usually already on your computer.</p>
       </div>
-      <div class="release-list" data-release-list>
+      <div class="rb" data-rb data-reveal>
 <!--releases-->
       </div>
+      <p class="releases-foot" data-reveal><span data-release-count>%RELEASE_COUNT%</span> releases so far. <a class="text-link" href="https://github.com/ItIsNotKeshav/Zeus/releases">Downloads for each on GitHub</a></p>
     </section>
 
     <a class="band" href="https://github.com/ItIsNotKeshav/Zeus/releases/latest">

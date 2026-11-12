@@ -15,7 +15,7 @@ const WINDOW_ASPECT = 936 / 1600;
 // A desktop window's corner, about 20 points on the 1333-point shot, so it stays
 // concentric outside the floating chat panel's own corner.
 const WINDOW_RADIUS = 0.015;
-const PAPER = new THREE.Color("#f3f3f1");
+const PAPER = new THREE.Color("#f7f7f7");
 const COAL = new THREE.Color("#0b0b0c");
 const ACCENT = new THREE.Color("#ffd60a");
 
@@ -89,6 +89,7 @@ export class Sky {
     this.skyUniforms = {
       uTime: { value: 0 },
       uStorm: { value: 0 },
+      uAura: { value: 0 },
       uFlash: { value: 0 },
       uFlashPos: { value: new THREE.Vector2(0, 0.5) },
       uAspect: { value: 1 },
@@ -107,7 +108,7 @@ export class Sky {
         }`,
       fragmentShader: /* glsl */ `
         varying vec2 vUv;
-        uniform float uTime, uStorm, uFlash, uAspect;
+        uniform float uTime, uStorm, uAura, uFlash, uAspect;
         uniform vec2 uFlashPos;
         uniform vec3 uPaper, uCoal;
         float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -132,7 +133,17 @@ export class Sky {
           float d = length(p - uFlashPos * vec2(uAspect, 1.0));
           float lit = uFlash * (0.18 + 0.82 * exp(-d * 2.4)) * (0.35 + body);
           storm += vec3(0.42, 0.47, 0.62) * lit;
-          gl_FragColor = vec4(mix(uPaper, storm, uStorm), 1.0);
+          // The hero's dawn: soft, slow pools of the bolt's yellow and a little sky,
+          // drifting like light through leaves, gone by the time the window settles.
+          float w = uTime * 0.06;
+          float sun = fbm(p * 1.1 + vec2(w, -w * 0.6) + q * 0.9);
+          float leaf = fbm(p * 3.2 + vec2(-w * 1.4, w) + 3.0);
+          vec3 dawn = mix(vec3(1.0, 0.93, 0.62), vec3(1.0, 0.84, 0.26), smoothstep(0.35, 0.75, sun));
+          dawn = mix(dawn, vec3(0.86, 0.68, 0.16), smoothstep(0.55, 0.85, leaf) * 0.45);
+          dawn = mix(dawn, vec3(0.80, 0.88, 1.0), smoothstep(0.62, 0.9, fbm(p * 0.8 - vec2(w * 0.5, 7.0))) * 0.55);
+          float fade = smoothstep(-0.9, 0.05, p.y);
+          vec3 day = mix(uPaper, dawn, uAura * fade);
+          gl_FragColor = vec4(mix(day, storm, uStorm), 1.0);
           #include <colorspace_fragment>
         }`,
     });
@@ -464,6 +475,7 @@ export class Sky {
     const u = this.skyUniforms;
     u.uTime.value = this.time;
     u.uStorm.value = s.storm;
+    u.uAura.value = s.win.aura ?? 0;
     this.rainUniforms.uTime.value = this.time;
     this.rainUniforms.uRain.value = this.reduced ? 0 : s.rain;
     this.rain.visible = !this.reduced && s.rain > 0.01;

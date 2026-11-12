@@ -82,51 +82,68 @@ export const formatDate = (iso) =>
 
 const FIRST_RELEASE = "The first Zeus release, built on ZapFast.";
 
-export function renderRelease(release, { latest = false, open = false } = {}) {
+export const shortDate = (iso) =>
+  new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+
+// Releases read like the app's own chats: a list of versions on the left (avatar, name,
+// preview, date, a count badge) and the open one as a conversation card on the right,
+// its notes as message bubbles under day-chip headings.
+function prepare(release) {
   const { summary, sections } = parseBody(release.body);
-  const id = slug(release.tag);
   const added = count(sections, "new");
   const fixed = count(sections, "fixed");
-  const tally = [added && `${added} new`, fixed && `${fixed} fixed`].filter(Boolean).join(" · ");
-  const body = sections
+  return { summary: summary || FIRST_RELEASE, sections, added, fixed, v: version(release.tag), id: slug(release.tag) };
+}
+
+export function renderRow(release, { latest = false, selected = false } = {}) {
+  const r = prepare(release);
+  const [major, minor] = r.v.split(".");
+  const badge = r.added ? `<span class="rb-badge" aria-label="${r.added} new">${r.added}</span>` : "";
+  return `<button type="button" class="rb-row${selected ? " is-selected" : ""}" role="tab" id="${r.id}-tab" aria-controls="${r.id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}" data-tag="${escape(release.tag)}">
+  <span class="rb-avatar${latest ? " is-latest" : ""}" aria-hidden="true">${major}.${minor}</span>
+  <span class="rb-name">Zeus ${escape(r.v)}${latest ? ' <span class="rb-latest">Latest</span>' : ""}${release.prerelease ? ' <span class="rb-latest is-beta">Beta</span>' : ""}</span>
+  <time class="rb-time" datetime="${escape(release.date)}">${shortDate(release.date)}</time>
+  <span class="rb-preview">${inline(r.summary).replace(/<a [^>]*>|<\/a>/g, "")}</span>
+  ${badge}
+</button>`;
+}
+
+export function renderPane(release, { selected = false } = {}) {
+  const r = prepare(release);
+  const tally = [r.added && `${r.added} new`, r.fixed && `${r.fixed} fixed`].filter(Boolean).join(", ");
+  const bubbles = r.sections
     .map((section) => {
-      const blocks = section.blocks
-        .map((block) =>
-          block.type === "ul"
-            ? `<ul>${block.items.map((item) => `<li>${inline(item)}</li>`).join("")}</ul>`
-            : `<p>${inline(block.text)}</p>`,
-        )
-        .join("");
-      const title = section.title ? `<h4 class="release-kind" data-kind="${escape(section.title.toLowerCase())}">${inline(section.title)}</h4>` : "";
-      return `<div class="release-section">${title}${blocks}</div>`;
+      const chip = section.title ? `<p class="rb-chip" data-kind="${escape(section.title.toLowerCase())}">${inline(section.title)}</p>` : "";
+      const items = section.blocks.flatMap((block) => (block.type === "ul" ? block.items : [block.text]));
+      return chip + items.map((item) => `<p class="rb-bubble">${inline(item)}</p>`).join("");
     })
     .join("");
-  const badges = [latest && `<span class="release-badge">Latest</span>`, release.prerelease && `<span class="release-badge is-beta">Beta</span>`]
-    .filter(Boolean)
-    .join("");
-  return `<article class="release${open ? " is-open" : ""}" id="${id}" data-tag="${escape(release.tag)}" data-reveal>
-  <h3 class="release-title">
-    <button type="button" class="release-head" aria-expanded="${open}" aria-controls="${id}-notes">
-      <span class="release-ver">${escape(version(release.tag))}</span>${badges}
-      <time class="release-date" datetime="${escape(release.date)}">${formatDate(release.date)}</time>
-      <span class="release-sum">${inline(summary || FIRST_RELEASE)}</span>
-      ${tally ? `<span class="release-tally">${tally}</span>` : ""}
-      <svg class="release-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-  </h3>
-  <div class="release-notes" id="${id}-notes" role="region" aria-label="Zeus ${escape(version(release.tag))} release notes">
-    <div class="release-inner">
-      ${body}
-      <p class="release-link"><a href="${escape(release.url)}">Downloads and full notes on GitHub</a></p>
+  return `<article class="rb-pane${selected ? " is-active" : ""}" role="tabpanel" id="${r.id}" aria-labelledby="${r.id}-tab" data-tag="${escape(release.tag)}">
+  <header class="rb-head">
+    <span class="rb-avatar" aria-hidden="true">${r.v.split(".").slice(0, 2).join(".")}</span>
+    <div class="rb-head-text">
+      <h3>Zeus ${escape(r.v)}</h3>
+      <p>${formatDate(release.date)}${tally ? ` · ${tally}` : ""}</p>
     </div>
+    <a class="rb-open" href="${escape(release.url)}">On GitHub</a>
+  </header>
+  <div class="rb-scroll" data-lenis-prevent>
+    <p class="rb-bubble rb-lead">${inline(r.summary)}</p>
+    ${bubbles}
   </div>
 </article>`;
 }
 
-export function renderReleases(releases) {
-  return releases.map((release, i) => renderRelease(release, { latest: i === 0, open: i === 0 })).join("\n");
+export function renderBrowser(releases) {
+  const rows = releases.map((release, i) => renderRow(release, { latest: i === 0, selected: i === 0 })).join("\n");
+  const panes = releases.map((release, i) => renderPane(release, { selected: i === 0 })).join("\n");
+  return `<div class="rb-list" role="tablist" aria-label="Zeus releases" aria-orientation="vertical" data-lenis-prevent>
+${rows}
+</div>
+<div class="rb-panes">
+${panes}
+</div>`;
 }
-
 // The GitHub API's shape, reduced to what the page uses.
 export const fromApi = (r) => ({
   tag: r.tag_name,

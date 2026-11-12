@@ -1,7 +1,7 @@
 import Lenis from "lenis";
 import { Sky } from "./scene.js";
 import { THEMES } from "./themes.js";
-import { REPO, fromApi, renderRelease, version } from "./releases.js";
+import { REPO, fromApi, renderPane, renderRow, version } from "./releases.js";
 
 const root = document.documentElement;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -9,6 +9,37 @@ const lite = matchMedia("(max-width: 900px)").matches || (navigator.hardwareConc
 const $ = (selector, el = document) => el.querySelector(selector);
 const $$ = (selector, el = document) => [...el.querySelectorAll(selector)];
 root.classList.add("js-motion");
+
+// The headline arrives a word at a time, each one coming into focus.
+for (const line of document.querySelectorAll("[data-split]")) {
+  let i = 0;
+  const wrap = (node) => {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const parts = child.textContent.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        for (const part of parts) {
+          if (!part) continue;
+          if (/^\s+$/.test(part)) frag.append(part);
+          else {
+            const word = document.createElement("span");
+            word.className = "word";
+            word.style.setProperty("--i", String(i++));
+            word.textContent = part;
+            frag.append(word);
+          }
+        }
+        child.replaceWith(frag);
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        if (child.tagName === "EM") {
+          child.classList.add("word");
+          child.style.setProperty("--i", String(i++));
+        } else wrap(child);
+      }
+    }
+  };
+  wrap(line);
+}
 
 const WINDOW_ASPECT = 936 / 1600;
 const TAU = Math.PI * 2;
@@ -22,6 +53,8 @@ const el = {
   calls: $(".calls"),
   footer: $(".footer"),
   slotHero: $('[data-slot="hero"]'),
+  monument: $(".hero .monument"),
+  stageHero: $('[data-stage="hero"]'),
   slotFooter: $('[data-slot="footer"]'),
   stageUnveil: $('[data-stage="unveil"]'),
   stageStats: $('[data-stage="stats"]'),
@@ -96,7 +129,7 @@ function pose(name) {
   let rain = 0;
   switch (name) {
     case "hero":
-      win = { ...fit(el.stageUnveil), z: -1.5, rx: 0.8, ry: 0.25, rz: -0.04, opacity: 0 };
+      win = { ...fit(el.stageHero), z: 0.6, rx: 0.16, ry: 0, rz: 0, opacity: 1, aura: 1 };
       tile = { ...slot(el.slotHero), z: 0, rx: 0, ry: 0, rz: 0, glow: 0 };
       break;
     case "unveilA":
@@ -141,6 +174,7 @@ function pose(name) {
       win = { x: window.innerWidth / 2, y: vh * 1.5, w: 10, ...hidden };
       tile = { ...slot(el.slotFooter), z: 0, rx: 0, ry: TAU, rz: 0, glow: 0 };
   }
+  win.aura ??= 0;
   return { win, tile, storm, rain };
 }
 
@@ -284,31 +318,53 @@ for (const button of $$(".feature-col button")) {
   button.addEventListener("click", show);
 }
 
-// Releases: each one opens in place; the newest is open to begin with.
-const releaseList = $("[data-release-list]");
-function setOpen(release, open) {
-  release.classList.toggle("is-open", open);
-  $(".release-head", release).setAttribute("aria-expanded", String(open));
+// Releases: a list of versions beside the open one, like a chat list beside a chat.
+const rb = $("[data-rb]");
+const rbList = $(".rb-list", rb);
+const rbPanes = $(".rb-panes", rb);
+function selectRelease(tag, { focus = false } = {}) {
+  const row = $$(".rb-row", rbList).find((node) => node.dataset.tag === tag);
+  const pane = $$(".rb-pane", rbPanes).find((node) => node.dataset.tag === tag);
+  if (!row || !pane || row.classList.contains("is-selected")) return;
+  for (const other of $$(".rb-row", rbList)) {
+    const on = other === row;
+    other.classList.toggle("is-selected", on);
+    other.setAttribute("aria-selected", String(on));
+    other.tabIndex = on ? 0 : -1;
+  }
+  for (const other of $$(".rb-pane", rbPanes)) other.classList.toggle("is-active", other === pane);
+  $(".rb-scroll", pane).scrollTop = 0;
+  // Bring the row into view inside the list only, never the page.
+  const top = row.offsetTop - rbList.offsetTop;
+  if (top < rbList.scrollTop || top + row.offsetHeight > rbList.scrollTop + rbList.clientHeight) {
+    rbList.scrollTo({ top: top - 8, left: row.offsetLeft - 16, behavior: reduced ? "auto" : "smooth" });
+  }
+  if (rbList.scrollWidth > rbList.clientWidth) {
+    rbList.scrollTo({ left: row.offsetLeft - 16, behavior: reduced ? "auto" : "smooth" });
+  }
+  if (focus) row.focus();
 }
-releaseList.addEventListener("click", (event) => {
-  const head = event.target.closest(".release-head");
-  if (!head) return;
-  const release = head.closest(".release");
-  setOpen(release, !release.classList.contains("is-open"));
-  setTimeout(measure, 650);
+rbList.addEventListener("click", (event) => {
+  const row = event.target.closest(".rb-row");
+  if (row) selectRelease(row.dataset.tag);
 });
-for (const button of $$("[data-releases-toggle]")) {
-  button.addEventListener("click", () => {
-    const open = button.dataset.releasesToggle === "open";
-    for (const release of $$(".release", releaseList)) setOpen(release, open);
-    setTimeout(measure, 650);
-  });
-}
+rbList.addEventListener("keydown", (event) => {
+  const keys = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+  const rows = $$(".rb-row", rbList);
+  const at = rows.findIndex((row) => row.classList.contains("is-selected"));
+  let next = null;
+  if (event.key in keys) next = rows[Math.min(rows.length - 1, Math.max(0, at + keys[event.key]))];
+  if (event.key === "Home") next = rows[0];
+  if (event.key === "End") next = rows[rows.length - 1];
+  if (!next) return;
+  event.preventDefault();
+  selectRelease(next.dataset.tag, { focus: true });
+});
 
-// A link to one release (#release-0-40-0) opens it on the way there.
+// A link to one release (#release-0-40-0) opens it.
 function openFromHash() {
   const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
-  if (target?.classList.contains("release")) setOpen(target, true);
+  if (target?.classList.contains("rb-pane")) selectRelease(target.dataset.tag);
 }
 window.addEventListener("hashchange", openFromHash);
 openFromHash();
@@ -320,26 +376,27 @@ async function freshReleases() {
       headers: { Accept: "application/vnd.github+json" },
     });
     if (!response.ok) return;
-    const known = new Set($$(".release", releaseList).map((node) => node.dataset.tag));
+    const known = new Set($$(".rb-row", rbList).map((node) => node.dataset.tag));
     const fresh = (await response.json())
       .filter((r) => !r.draft && r.published_at && !known.has(r.tag_name))
       .map(fromApi)
       .sort((a, b) => a.date.localeCompare(b.date));
     if (!fresh.length) return;
-    for (const old of $$(".release", releaseList)) {
-      $(".release-badge:not(.is-beta)", old)?.remove();
-      setOpen(old, false);
+    for (const old of $$(".rb-latest:not(.is-beta), .rb-avatar.is-latest", rbList)) {
+      if (old.classList.contains("rb-avatar")) old.classList.remove("is-latest");
+      else old.remove();
     }
     fresh.forEach((release, i) => {
       const newest = i === fresh.length - 1;
-      releaseList.insertAdjacentHTML("afterbegin", renderRelease(release, { latest: newest, open: newest }));
-      releaseList.firstElementChild.classList.add("is-in", "is-fresh");
+      rbList.insertAdjacentHTML("afterbegin", renderRow(release, { latest: newest }));
+      rbList.firstElementChild.classList.add("is-fresh");
+      rbPanes.insertAdjacentHTML("afterbegin", renderPane(release));
     });
+    selectRelease(fresh[fresh.length - 1].tag);
     const latest = version(fresh[fresh.length - 1].tag);
     for (const node of $$("[data-latest-version]")) node.textContent = latest;
     const count = $("[data-release-count]");
-    if (count) count.textContent = String($$(".release", releaseList).length);
-    measure();
+    if (count) count.textContent = String($$(".rb-row", rbList).length);
   } catch {
     // Offline or rate-limited: the notes built into the page stand.
   }
@@ -351,7 +408,7 @@ new IntersectionObserver(
     freshReleases();
   },
   { rootMargin: "60% 0px" },
-).observe(releaseList);
+).observe(rb);
 
 // Entrances: each part of a section rises in turn.
 const reveal = new IntersectionObserver(
@@ -436,6 +493,13 @@ function update(dt) {
   if (!reduced) {
     const entrance = Math.min(1, (performance.now() - started) / 1600);
     const settle = 1 - Math.pow(1 - entrance, 3);
+    // The window rises from below the fold and leans back as the page opens.
+    const rise = Math.min(1, Math.max(0, (performance.now() - started - 450) / 1500));
+    const lift = 1 - Math.pow(1 - rise, 4);
+    s.win.y += (1 - lift) * vh * 0.7;
+    s.win.rx += (1 - lift) * 0.55;
+    s.win.opacity *= Math.min(1, rise * 3);
+    s.win.aura *= Math.min(1, (performance.now() - started) / 900);
     s.tile.y -= (1 - settle) * vh * 0.55;
     s.tile.ry += (1 - settle) * TAU * 1.25;
     s.tile.rx += Math.sin(clock * 0.7) * 0.07 + pointer.sy * 0.28;
@@ -453,6 +517,12 @@ function update(dt) {
         else sky.strike(sky.pointToWorld(Math.random() * window.innerWidth, vh * (0.75 + Math.random() * 0.3), -6), { far: true });
       }
     }
+  }
+  // The window passes in front of the name: hide the letters below its top edge.
+  if (y < vh * 1.5) {
+    const top = s.win.y - ((s.win.w * WINDOW_ASPECT) / 2) * Math.cos(s.win.rx);
+    const r = el.monument.getBoundingClientRect();
+    el.monument.style.clipPath = `inset(0 0 ${Math.max(0, r.bottom - top).toFixed(1)}px 0)`;
   }
   el.storm.style.setProperty("--day", String(1 - Math.min(1, Math.max(0, (s.storm - 0.3) / 0.3))));
   sky.frame(dt, s);
