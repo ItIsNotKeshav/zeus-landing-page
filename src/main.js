@@ -64,7 +64,19 @@ const el = {
 };
 
 // Smooth scrolling, unless the reader asked for less motion.
-const lenis = reduced ? null : new Lenis({ lerp: 0.085, anchors: true });
+// A fixed-length glide per wheel step with an expo ease-out reads calmer than lerp,
+// and touch keeps the device's own momentum.
+const lenis = reduced
+  ? null
+  : new Lenis({
+      duration: 1.15,
+      easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 0.9,
+      touchMultiplier: 1,
+      syncTouch: false,
+      anchors: { duration: 1.4 },
+    });
 
 let sky = null;
 try {
