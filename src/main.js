@@ -226,7 +226,7 @@ window.addEventListener("pointermove", (event) => {
 // as discs of their ground with a dot of their accent; the window wears the pick.
 const darkScheme = matchMedia("(prefers-color-scheme: dark)");
 // Accent stills exist only once shot (public/img/themes/accents/).
-const ACCENT_STILLS = false;
+const ACCENT_STILLS = true;
 const pickState = { theme: THEMES[0], mode: "dark", accent: ACCENTS[0] };
 let picked = "zeus-dark";
 const themeGroup = $('[data-picker="theme"]');
