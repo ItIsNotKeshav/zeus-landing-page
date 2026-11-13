@@ -167,42 +167,68 @@ for (const group of [themeGroup, accentGroup, modeGroup]) {
 }
 pick();
 
-// Calls: three kinds, one plate.
+// Calls: three kinds in one window. While the section is on screen they take
+// turns on their own (the pill's thin line shows the wait); a click picks one
+// and stops the turns.
 const CALLS = {
-  group: {
-    src: "/img/call-group.webp",
-    alt: "A group video call in Zeus with five people",
-    text: "Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.",
-  },
-  video: {
-    src: "/img/call-video.webp",
-    alt: "A one-to-one video call in Zeus, the other person's camera filling the window",
-    text: "Video one to one, up to 720p, stepping its quality up and down with your connection as the call goes.",
-  },
-  voice: {
-    src: "/img/call-voice.webp",
-    alt: "A voice call in Zeus with Luna Starling, three minutes in",
-    text: "Voice through the microphone and speaker you choose. Switch either mid-call and the call carries on.",
-  },
+  group: "Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.",
+  video: "Video one to one, up to 720p, stepping its quality up and down with your connection as the call goes.",
+  voice: "Voice through the microphone and speaker you choose, with a clear timer and one tap to hang up.",
 };
-const callImage = $("[data-call-image]");
+const CALL_ORDER = ["group", "video", "voice"];
+const CALL_TURN = 5000;
+const callSwitch = $("[data-call-switch]");
 const callText = $("[data-call-text]");
+const callTimer = $("[data-call-timer]");
+let callAt = 0;
+let callAuto = !reduced;
+let callTick = null;
+function showCall(kind) {
+  callAt = CALL_ORDER.indexOf(kind);
+  callSwitch?.style.setProperty("--at", String(callAt));
+  for (const button of $$("[data-call]")) button.setAttribute("aria-pressed", String(button.dataset.call === kind));
+  for (const shot of $$("[data-call-shot]")) shot.classList.toggle("is-on", shot.dataset.callShot === kind);
+  if (callText) {
+    callText.classList.add("is-swapping");
+    setTimeout(() => {
+      callText.textContent = CALLS[kind];
+      callText.classList.remove("is-swapping");
+    }, reduced ? 0 : 160);
+  }
+}
+function runCallTimer() {
+  if (!callTimer) return;
+  callTimer.getAnimations().forEach((a) => a.cancel());
+  if (!callAuto) return;
+  callTimer.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: CALL_TURN, easing: "linear", fill: "forwards" });
+}
+function startCallTurns() {
+  if (!callAuto || callTick) return;
+  runCallTimer();
+  callTick = setInterval(() => {
+    showCall(CALL_ORDER[(callAt + 1) % CALL_ORDER.length]);
+    runCallTimer();
+  }, CALL_TURN);
+}
+function stopCallTurns() {
+  clearInterval(callTick);
+  callTick = null;
+  callTimer?.getAnimations().forEach((a) => a.cancel());
+}
 for (const button of $$("[data-call]")) {
   button.addEventListener("click", () => {
-    const call = CALLS[button.dataset.call];
-    for (const other of $$("[data-call]")) other.setAttribute("aria-pressed", String(other === button));
-    callImage.style.opacity = 0;
-    callText.style.opacity = 0;
-    setTimeout(() => {
-      callImage.src = call.src;
-      callImage.alt = call.alt;
-      callText.textContent = call.text;
-      callImage.style.opacity = 1;
-      callText.style.opacity = 1;
-    }, reduced ? 0 : 180);
+    callAuto = false;
+    stopCallTurns();
+    showCall(button.dataset.call);
   });
 }
-for (const call of Object.values(CALLS)) new Image().src = call.src;
+const callsSection = $("#calls");
+if (callsSection && !reduced) {
+  new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) startCallTurns();
+    else stopCallTurns();
+  }, { threshold: 0.35 }).observe(callsSection);
+}
 
 // The tour video: plays, muted, while it is on screen; sound is the reader's choice.
 const film = $("[data-film]");
