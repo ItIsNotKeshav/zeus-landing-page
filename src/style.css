@@ -4190,3 +4190,131 @@ main > section.themes {
 
 .tiles .t1 { top: 14%; left: 9%; }
 .tiles .t2 { top: 12%; right: 11%; }
+
+/* ===========================================================================
+   Gallery rail: every theme on one row that slides sideways as the page
+   scrolls (main.js sets the section's height and the track's offset). The
+   card in the middle stands up; the others lean back a little and dim.
+   =========================================================================== */
+main > section.rail {
+  position: relative;
+  padding: var(--section) 0 0;
+}
+
+.rail-pin {
+  display: grid;
+  align-content: center;
+  gap: clamp(28px, 4vw, 48px);
+  min-height: 100svh;
+  padding-block: 80px 40px;
+  overflow: hidden;
+}
+
+.has-rail .rail-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+
+.rail-head {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: var(--m);
+}
+
+.rail-head p {
+  color: var(--muted);
+}
+
+.rail-track {
+  --card: min(64vw, 820px);
+  display: flex;
+  gap: clamp(16px, 2.4vw, 32px);
+  padding-inline: calc(50vw - var(--card) / 2);
+  will-change: transform;
+}
+
+.rail-card {
+  --d: 0;
+  flex: none;
+  width: var(--card);
+  margin: 0;
+  transform: translateY(calc(min(1, abs(var(--d))) * 18px)) scale(calc(1 - min(1, abs(var(--d))) * 0.1));
+  opacity: calc(1 - min(1, abs(var(--d))) * 0.5);
+  transform-origin: 50% 50%;
+}
+
+.rail-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-dialog);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 30px 70px -24px rgb(0 0 0 / 0.45);
+}
+
+.rail-card figcaption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-inline: 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.rail-card figcaption span + span {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.rail-bar {
+  width: min(240px, 50vw);
+  height: 3px;
+  margin-inline: auto;
+  border-radius: 3px;
+  background: var(--tint-field);
+  overflow: hidden;
+}
+
+.rail-bar i {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+  transform: scaleX(0.08);
+  transform-origin: 0 50%;
+}
+
+/* Without the pin (reduced motion or no script) the rail is a plain swipe row. */
+:root:not(.has-rail) .rail-track {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-inline: var(--m);
+  scrollbar-width: none;
+}
+
+:root:not(.has-rail) .rail-card {
+  scroll-snap-align: center;
+  transform: none;
+  opacity: 1;
+}
+
+:root:not(.has-rail) .rail-bar {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .rail-track {
+    --card: 82vw;
+  }
+
+  .rail-card img {
+    border-radius: var(--radius-panel);
+  }
+}
+
+.rail-track {
+  min-width: 0;
+  width: 100%;
+}

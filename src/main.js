@@ -456,9 +456,54 @@ function update() {
   }
 }
 
+// The gallery rail: pinned while the page scrolls past it, sliding sideways
+// by exactly as far as the cards run past the screen. Cards near the middle
+// stand up straight; the rest lean back and dim a little.
+const rail = $("[data-rail]");
+const railTrack = $("[data-rail-track]");
+const railBar = $("[data-rail-bar]");
+let railRun = 0;
+// The rail moves a little faster than the page, so nine themes take fewer screens of scrolling.
+const RAIL_PACE = 0.7;
+let railCards = [];
+let railLast = -1;
+function railMeasure() {
+  if (!rail || reduced) return;
+  railTrack.style.transform = "";
+  railRun = Math.max(0, railTrack.scrollWidth - railTrack.clientWidth);
+  rail.style.height = `${innerHeight + railRun * RAIL_PACE}px`;
+  railCards = $$(".rail-card", railTrack).map((card) => ({ card, mid: card.offsetLeft + card.offsetWidth / 2 }));
+  railLast = -1;
+}
+function railUpdate() {
+  if (!rail || reduced || !railRun) return;
+  const top = rail.offsetTop;
+  const y = window.scrollY;
+  if (y < top - innerHeight || y > top + railRun * RAIL_PACE + innerHeight) return;
+  const p = Math.min(1, Math.max(0, (y - top) / (railRun * RAIL_PACE)));
+  if (Math.abs(p - railLast) < 0.0002) return;
+  railLast = p;
+  const x = p * railRun;
+  railTrack.style.transform = `translate3d(${-x}px, 0, 0)`;
+  if (railBar) railBar.style.transform = `scaleX(${0.08 + p * 0.92})`;
+  const centre = x + railTrack.clientWidth / 2;
+  const half = railTrack.clientWidth / 2 || 1;
+  for (const { card, mid } of railCards) {
+    const d = Math.max(-1.5, Math.min(1.5, (mid - centre) / half));
+    card.style.setProperty("--d", d.toFixed(3));
+  }
+}
+if (rail && !reduced) {
+  document.documentElement.classList.add("has-rail");
+  railMeasure();
+  addEventListener("resize", railMeasure);
+  addEventListener("load", railMeasure);
+}
+
 function loop(now) {
   lenis?.raf(now);
   update();
+  railUpdate();
   requestAnimationFrame(loop);
 }
 
