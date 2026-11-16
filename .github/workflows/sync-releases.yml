@@ -1,0 +1,73 @@
+# Keeps the page in step with Zeus releases. Every few hours (or on demand) it
+# re-reads the releases from GitHub; when there is a new one, it commits the
+# refreshed src/releases.json to main. The version, the download links, the
+# hero pill and the release notes all come from that file at build time, so the
+# commit is all a new release needs. Hand-written copy is never touched; a
+# better pill line for a release can go into src/highlights.json.
+#
+# Deploying: with the repository connected in Vercel (landing > Settings > Git),
+# the push to main deploys on its own. Without that, add a Vercel deploy hook URL
+# as the repository secret VERCEL_DEPLOY_HOOK and this workflow calls it.
+name: Sync releases
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+  # Lets the Zeus repository ping this one right after it publishes:
+  # POST /repos/ItIsNotKeshav/zeus-landing-page/dispatches {"event_type":"zeus-release"}
+  repository_dispatch:
+    types: [zeus-release]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-releases
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch the releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/fetch-releases.mjs
+
+      - name: Commit when something changed
+        id: commit
+        run: |
+          if git diff --quiet -- src/releases.json; then
+            echo "No new release."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          latest=$(node -e 'console.log(JSON.parse(require("fs").readFileSync("src/releases.json","utf8"))[0].tag)')
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/releases.json
+          git commit -m "Release notes: Zeus ${latest#v}"
+          git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy through the Vercel hook
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "No VERCEL_DEPLOY_HOOK secret; relying on Vercel's Git connection."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "Deploy hook called."

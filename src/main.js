@@ -1,6 +1,7 @@
 import Lenis from "lenis";
 import { ACCENTS, THEMES } from "./themes.js";
-import { REPO, fromApi, renderPane, renderRow, version } from "./releases.js";
+import { REPO, fromApi, pillText, renderPane, renderRow, version } from "./releases.js";
+import HIGHLIGHTS from "./highlights.json";
 
 const root = document.documentElement;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -167,67 +168,74 @@ for (const group of [themeGroup, accentGroup, modeGroup]) {
 }
 pick();
 
-// Calls: three kinds in one window. While the section is on screen they take
-// turns on their own (the pill's thin line shows the wait); a click picks one
-// and stops the turns.
-const CALLS = {
-  group: "Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.",
-  video: "Video one to one, up to 720p, stepping its quality up and down with your connection as the call goes.",
-  voice: "Voice through the microphone and speaker you choose, with a clear timer and one tap to hang up.",
+// Switchers: a framed window whose pictures take turns on their own while the
+// section is on screen (the pill's thin line shows the wait); a click picks one
+// and stops the turns. Used by the calls and by split view and bubbles.
+const SWITCHER_TEXT = {
+  calls: {
+    group: "Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.",
+    video: "Video one to one, up to 720p, stepping its quality up and down with your connection as the call goes.",
+    voice: "Voice through the microphone and speaker you choose, with a clear timer and one tap to hang up.",
+  },
+  two: {
+    split: "Drag a chat onto the open one and read both side by side. Drag a message or a picture across to send it to the other chat.",
+    bubbles: "Float up to three chats over your other windows and reply from there, with emoji, several lines and photos shown before they go.",
+  },
 };
-const CALL_ORDER = ["group", "video", "voice"];
-const CALL_TURN = 5000;
-const callSwitch = $("[data-call-switch]");
-const callText = $("[data-call-text]");
-const callTimer = $("[data-call-timer]");
-let callAt = 0;
-let callAuto = !reduced;
-let callTick = null;
-function showCall(kind) {
-  callAt = CALL_ORDER.indexOf(kind);
-  callSwitch?.style.setProperty("--at", String(callAt));
-  for (const button of $$("[data-call]")) button.setAttribute("aria-pressed", String(button.dataset.call === kind));
-  for (const shot of $$("[data-call-shot]")) shot.classList.toggle("is-on", shot.dataset.callShot === kind);
-  if (callText) {
-    callText.classList.add("is-swapping");
+const SWITCH_TURN = 5000;
+for (const root of $$("[data-switcher]")) {
+  const texts = SWITCHER_TEXT[root.dataset.switcher];
+  const order = Object.keys(texts);
+  const pill = $("[data-sw-switch]", root);
+  const text = $("[data-sw-text]", root);
+  const timer = $("[data-sw-timer]", root);
+  let at = 0;
+  let auto = !reduced;
+  let tick = null;
+  const show = (kind) => {
+    at = order.indexOf(kind);
+    pill?.style.setProperty("--at", String(at));
+    for (const button of $$("[data-sw]", root)) button.setAttribute("aria-pressed", String(button.dataset.sw === kind));
+    for (const shot of $$("[data-sw-shot]", root)) shot.classList.toggle("is-on", shot.dataset.swShot === kind);
+    if (!text) return;
+    text.classList.add("is-swapping");
     setTimeout(() => {
-      callText.textContent = CALLS[kind];
-      callText.classList.remove("is-swapping");
+      text.textContent = texts[kind];
+      text.classList.remove("is-swapping");
     }, reduced ? 0 : 160);
+  };
+  const runTimer = () => {
+    if (!timer) return;
+    timer.getAnimations().forEach((a) => a.cancel());
+    if (!auto) return;
+    timer.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: SWITCH_TURN, easing: "linear", fill: "forwards" });
+  };
+  const start = () => {
+    if (!auto || tick) return;
+    runTimer();
+    tick = setInterval(() => {
+      show(order[(at + 1) % order.length]);
+      runTimer();
+    }, SWITCH_TURN);
+  };
+  const stop = () => {
+    clearInterval(tick);
+    tick = null;
+    timer?.getAnimations().forEach((a) => a.cancel());
+  };
+  for (const button of $$("[data-sw]", root)) {
+    button.addEventListener("click", () => {
+      auto = false;
+      stop();
+      show(button.dataset.sw);
+    });
   }
-}
-function runCallTimer() {
-  if (!callTimer) return;
-  callTimer.getAnimations().forEach((a) => a.cancel());
-  if (!callAuto) return;
-  callTimer.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: CALL_TURN, easing: "linear", fill: "forwards" });
-}
-function startCallTurns() {
-  if (!callAuto || callTick) return;
-  runCallTimer();
-  callTick = setInterval(() => {
-    showCall(CALL_ORDER[(callAt + 1) % CALL_ORDER.length]);
-    runCallTimer();
-  }, CALL_TURN);
-}
-function stopCallTurns() {
-  clearInterval(callTick);
-  callTick = null;
-  callTimer?.getAnimations().forEach((a) => a.cancel());
-}
-for (const button of $$("[data-call]")) {
-  button.addEventListener("click", () => {
-    callAuto = false;
-    stopCallTurns();
-    showCall(button.dataset.call);
-  });
-}
-const callsSection = $("#calls");
-if (callsSection && !reduced) {
-  new IntersectionObserver((entries) => {
-    if (entries.some((e) => e.isIntersecting)) startCallTurns();
-    else stopCallTurns();
-  }, { threshold: 0.35 }).observe(callsSection);
+  if (!reduced) {
+    new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) start();
+      else stop();
+    }, { threshold: 0.35 }).observe(root);
+  }
 }
 
 // The tour video: plays, muted, while it is on screen; sound is the reader's choice.
@@ -341,6 +349,8 @@ async function freshReleases() {
     selectRelease(fresh[fresh.length - 1].tag);
     const latest = version(fresh[fresh.length - 1].tag);
     for (const node of $$("[data-latest-version]")) node.textContent = latest;
+    const pill = $("[data-latest-pill-text]");
+    if (pill) pill.textContent = pillText(fresh[fresh.length - 1], HIGHLIGHTS);
     const count = $("[data-release-count]");
     if (count) count.textContent = String($$(".rb-row", rbList).length);
   } catch {

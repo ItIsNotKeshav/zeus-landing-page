@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { defineConfig } from "vite";
-import { renderBrowser, version, formatDate } from "./src/releases.js";
+import { renderBrowser, version, formatDate, pillText } from "./src/releases.js";
+
+const escapeHtml = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Writes the release notes into the page at build time, so they read without script
 // and search engines see them. main.js later adds anything published since.
@@ -10,8 +12,10 @@ function releaseNotes() {
     transformIndexHtml(html) {
       const releases = JSON.parse(readFileSync(new URL("./src/releases.json", import.meta.url), "utf8"));
       const latest = releases[0];
+      const highlights = JSON.parse(readFileSync(new URL("./src/highlights.json", import.meta.url), "utf8"));
       return html
         .replace("<!--releases-->", renderBrowser(releases))
+        .replaceAll("%LATEST_PILL%", escapeHtml(pillText(latest, highlights)))
         .replaceAll("%LATEST_VERSION%", version(latest.tag))
         .replaceAll("%LATEST_DATE%", formatDate(latest.date))
         .replaceAll("%LATEST_DATE_ISO%", latest.date)

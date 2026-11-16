@@ -61,7 +61,7 @@
         <div class="hero-copy">
           <a class="news-pill" href="#releases" data-latest-pill>
             <span class="news-dot" aria-hidden="true"></span>
-            <span>New in <strong>Zeus %LATEST_VERSION%</strong>: first-run setup, split view and much faster search</span>
+            <span>New in <strong>Zeus <span data-latest-version>%LATEST_VERSION%</span></strong>: <span data-latest-pill-text>%LATEST_PILL%</span></span>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
           <h1 class="hero-title" data-split>WhatsApp as a <em>real</em> desktop&nbsp;app.</h1>
@@ -219,24 +219,48 @@
       </div>
     </section>
 
+    <!-- Two chats at once: split view and chat bubbles in one framed window,
+         taking turns like the calls until the reader picks one. -->
+    <section class="calls two" id="two-chats" aria-labelledby="two-title" data-switcher="two">
+      <div class="calls-side" data-reveal>
+        <span class="two-badge"><i aria-hidden="true"></i>New in 0.42 · Experimental</span>
+        <h2 id="two-title">Two chats at once.</h2>
+        <div class="call-switch" role="group" aria-label="Ways to keep two chats open" data-sw-switch>
+          <button type="button" aria-pressed="true" data-sw="split"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="3"/><path d="M12 4.5v15"/></svg>Split view</button>
+          <button type="button" aria-pressed="false" data-sw="bubbles"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="5"/><circle cx="17" cy="16" r="3.5"/></svg>Chat bubbles</button>
+          <span class="call-timer" aria-hidden="true"><i data-sw-timer></i></span>
+        </div>
+        <p class="call-text" data-sw-text>Drag a chat onto the open one and read both side by side. Drag a message or a picture across to send it to the other chat.</p>
+        <ul class="call-notes">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 14 9l5.5.5-4.2 3.7 1.3 5.5L12 15.8l-4.6 2.9 1.3-5.5L4.5 9.5 10 9z"/></svg>Bubbles glow while their chat has unread messages.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7"/></svg>Set a chat to bubble up when it gets a new message, up to three at once.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg>Both are off at first: turn them on in Settings, under Experimental.</li>
+        </ul>
+      </div>
+      <div class="call-frame two-frame frame-glass" data-reveal>
+        <img class="call-shot is-on" data-sw-shot="split" src="/img/two-split.webp" alt="Zeus with two chats side by side in split view" width="1280" height="800" loading="lazy">
+        <img class="call-shot" data-sw-shot="bubbles" src="/img/two-bubbles.webp" alt="A Zeus chat bubble open over the desktop, with a photo ready to send" width="1280" height="800" loading="lazy">
+      </div>
+    </section>
+
     <!-- Calls: the three kinds in one framed window, cycling on their own until
          the reader picks one. -->
-    <section class="calls" id="calls" aria-labelledby="calls-title">
+    <section class="calls" id="calls" aria-labelledby="calls-title" data-switcher="calls">
       <div class="call-frame frame-glass" data-reveal>
-        <img class="call-shot is-on" data-call-shot="group" src="/img/call-group.webp" alt="A group video call in Zeus with five people" width="960" height="960" loading="lazy">
-        <img class="call-shot" data-call-shot="video" src="/img/call-video.webp" alt="A one-to-one video call in Zeus, the other person's camera filling the window" width="960" height="960" loading="lazy">
-        <img class="call-shot" data-call-shot="voice" src="/img/call-voice.webp" alt="A voice call in Zeus with Luna Starling, three minutes in" width="960" height="960" loading="lazy">
+        <img class="call-shot is-on" data-sw-shot="group" src="/img/call-group.webp" alt="A group video call in Zeus with five people" width="960" height="960" loading="lazy">
+        <img class="call-shot" data-sw-shot="video" src="/img/call-video.webp" alt="A one-to-one video call in Zeus, the other person's camera filling the window" width="960" height="960" loading="lazy">
+        <img class="call-shot" data-sw-shot="voice" src="/img/call-voice.webp" alt="A voice call in Zeus with Luna Starling, three minutes in" width="960" height="960" loading="lazy">
         <span class="call-live" aria-hidden="true"><i></i>Live</span>
       </div>
       <div class="calls-side" data-reveal>
         <h2 id="calls-title">Calls that carry.</h2>
-        <div class="call-switch" role="group" aria-label="Kinds of call" data-call-switch>
-          <button type="button" aria-pressed="true" data-call="group"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9.5" r="2.6"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14.5 18.5a4 4 0 0 1 6.5-3"/></svg>Group</button>
-          <button type="button" aria-pressed="false" data-call="video"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6.5" width="12.5" height="11" rx="3"/><path d="M15.5 10.5 21 7.5v9l-5.5-3z"/></svg>Video</button>
-          <button type="button" aria-pressed="false" data-call="voice"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.5h3l1.5 4-2 1.5a10 10 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15 15 0 0 1 3.5 6.5a2 2 0 0 1 2-2z"/></svg>Voice</button>
-          <span class="call-timer" aria-hidden="true"><i data-call-timer></i></span>
+        <div class="call-switch" role="group" aria-label="Kinds of call" data-sw-switch>
+          <button type="button" aria-pressed="true" data-sw="group"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9.5" r="2.6"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14.5 18.5a4 4 0 0 1 6.5-3"/></svg>Group</button>
+          <button type="button" aria-pressed="false" data-sw="video"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6.5" width="12.5" height="11" rx="3"/><path d="M15.5 10.5 21 7.5v9l-5.5-3z"/></svg>Video</button>
+          <button type="button" aria-pressed="false" data-sw="voice"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.5h3l1.5 4-2 1.5a10 10 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15 15 0 0 1 3.5 6.5a2 2 0 0 1 2-2z"/></svg>Voice</button>
+          <span class="call-timer" aria-hidden="true"><i data-sw-timer></i></span>
         </div>
-        <p class="call-text" data-call-text>Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.</p>
+        <p class="call-text" data-sw-text>Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.</p>
         <ul class="call-notes">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h2l2-5 3 10 3-8 2 3h4"/></svg>Echo cancelling keeps your speakers out of the call and lifts quiet voices.</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Push to talk: hold Space when the room is loud.</li>
