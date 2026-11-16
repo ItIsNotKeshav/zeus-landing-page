@@ -1,6 +1,7 @@
 import Lenis from "lenis";
 import { ACCENTS, THEMES } from "./themes.js";
-import { REPO, fromApi, renderPane, renderRow, version } from "./releases.js";
+import { REPO, fromApi, pillText, renderPane, renderRow, version } from "./releases.js";
+import HIGHLIGHTS from "./highlights.json";
 
 const root = document.documentElement;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -167,42 +168,75 @@ for (const group of [themeGroup, accentGroup, modeGroup]) {
 }
 pick();
 
-// Calls: three kinds, one plate.
-const CALLS = {
-  group: {
-    src: "/img/call-group.webp",
-    alt: "A group video call in Zeus with five people",
-    text: "Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.",
+// Switchers: a framed window whose pictures take turns on their own while the
+// section is on screen (the pill's thin line shows the wait); a click picks one
+// and stops the turns. Used by the calls and by split view and bubbles.
+const SWITCHER_TEXT = {
+  calls: {
+    group: "Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.",
+    video: "Video one to one, up to 720p, stepping its quality up and down with your connection as the call goes.",
+    voice: "Voice through the microphone and speaker you choose, with a clear timer and one tap to hang up.",
   },
-  video: {
-    src: "/img/call-video.webp",
-    alt: "A one-to-one video call in Zeus, the other person's camera filling the window",
-    text: "Video one to one, up to 720p, stepping its quality up and down with your connection as the call goes.",
-  },
-  voice: {
-    src: "/img/call-voice.webp",
-    alt: "A voice call in Zeus with Luna Starling, three minutes in",
-    text: "Voice through the microphone and speaker you choose. Switch either mid-call and the call carries on.",
+  two: {
+    split: "Drag a chat onto the open one and read both side by side. Drag a message or a picture across to send it to the other chat.",
+    bubbles: "Float up to three chats over your other windows and reply from there, with emoji, several lines and photos shown before they go.",
   },
 };
-const callImage = $("[data-call-image]");
-const callText = $("[data-call-text]");
-for (const button of $$("[data-call]")) {
-  button.addEventListener("click", () => {
-    const call = CALLS[button.dataset.call];
-    for (const other of $$("[data-call]")) other.setAttribute("aria-pressed", String(other === button));
-    callImage.style.opacity = 0;
-    callText.style.opacity = 0;
+const SWITCH_TURN = 5000;
+for (const root of $$("[data-switcher]")) {
+  const texts = SWITCHER_TEXT[root.dataset.switcher];
+  const order = Object.keys(texts);
+  const pill = $("[data-sw-switch]", root);
+  const text = $("[data-sw-text]", root);
+  const timer = $("[data-sw-timer]", root);
+  let at = 0;
+  let auto = !reduced;
+  let tick = null;
+  const show = (kind) => {
+    at = order.indexOf(kind);
+    pill?.style.setProperty("--at", String(at));
+    for (const button of $$("[data-sw]", root)) button.setAttribute("aria-pressed", String(button.dataset.sw === kind));
+    for (const shot of $$("[data-sw-shot]", root)) shot.classList.toggle("is-on", shot.dataset.swShot === kind);
+    if (!text) return;
+    text.classList.add("is-swapping");
     setTimeout(() => {
-      callImage.src = call.src;
-      callImage.alt = call.alt;
-      callText.textContent = call.text;
-      callImage.style.opacity = 1;
-      callText.style.opacity = 1;
-    }, reduced ? 0 : 180);
-  });
+      text.textContent = texts[kind];
+      text.classList.remove("is-swapping");
+    }, reduced ? 0 : 160);
+  };
+  const runTimer = () => {
+    if (!timer) return;
+    timer.getAnimations().forEach((a) => a.cancel());
+    if (!auto) return;
+    timer.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: SWITCH_TURN, easing: "linear", fill: "forwards" });
+  };
+  const start = () => {
+    if (!auto || tick) return;
+    runTimer();
+    tick = setInterval(() => {
+      show(order[(at + 1) % order.length]);
+      runTimer();
+    }, SWITCH_TURN);
+  };
+  const stop = () => {
+    clearInterval(tick);
+    tick = null;
+    timer?.getAnimations().forEach((a) => a.cancel());
+  };
+  for (const button of $$("[data-sw]", root)) {
+    button.addEventListener("click", () => {
+      auto = false;
+      stop();
+      show(button.dataset.sw);
+    });
+  }
+  if (!reduced) {
+    new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) start();
+      else stop();
+    }, { threshold: 0.35 }).observe(root);
+  }
 }
-for (const call of Object.values(CALLS)) new Image().src = call.src;
 
 // The tour video: plays, muted, while it is on screen; sound is the reader's choice.
 const film = $("[data-film]");
@@ -237,260 +271,6 @@ for (const button of $$(".feature-col button")) {
   button.addEventListener("focus", show);
   button.addEventListener("click", show);
 }
-
-// Footer: Zeus says goodbye in a chat, and a pile of the demo's stickers to throw about.
-const fcLog = $("[data-fc-log]");
-const fcStatus = $("[data-fc-status]");
-const JOKES = [
-  "Why did the browser tab join a gym? To lose a gigabyte.",
-  "An Electron app walks into a bar. It orders fourteen processes.",
-  "My memory use is so low I sometimes forget I'm running.",
-  "What does a bolt of lightning say when it's done? That was quick.",
-  "I'd tell you a joke about the borrow checker, but you'd only get to use it once.",
-  "How many Zeus windows does it take to change a light bulb? One. It opens in a blink.",
-];
-let jokeAt = Math.floor(Math.random() * JOKES.length);
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, reduced ? 0 : ms));
-function bubble(text, own = false) {
-  const node = document.createElement("p");
-  node.className = `fc-bubble${own ? " is-own" : ""}`;
-  node.textContent = text;
-  fcLog.append(node);
-  while (fcLog.children.length > 6) fcLog.firstElementChild.remove();
-  return node;
-}
-let typingBusy = false;
-async function say(lines) {
-  typingBusy = true;
-  for (const line of lines) {
-    fcStatus.textContent = "typing…";
-    const dots = document.createElement("p");
-    dots.className = "fc-bubble fc-typing";
-    dots.innerHTML = "<i></i><i></i><i></i>";
-    dots.setAttribute("aria-label", "Zeus is typing");
-    fcLog.append(dots);
-    await wait(520 + line.length * 12);
-    dots.remove();
-    bubble(line);
-    await wait(260);
-  }
-  fcStatus.textContent = "online";
-  typingBusy = false;
-}
-new IntersectionObserver(
-  (entries, observer) => {
-    if (!entries.some((entry) => entry.isIntersecting)) return;
-    observer.disconnect();
-    say(["Oh hey, you made it to the bottom.", "Zeus is free, open source and light on memory. Want a copy?"]);
-  },
-  { threshold: 0.4 },
-).observe($("[data-footer-chat]"));
-$("[data-joke]").addEventListener("click", async () => {
-  if (typingBusy) return;
-  bubble("Tell me a joke", true);
-  await wait(250);
-  jokeAt = (jokeAt + 1) % JOKES.length;
-  say([JOKES[jokeAt]]);
-});
-
-// The sticker pit: drop them in when it comes into view, then drag and throw.
-const pit = $("[data-pit]");
-const STICKERS = [
-  ["astronaut", "brb, in orbit"],
-  ["cat", "5 more minutes"],
-  ["frog", "LGTM"],
-  ["goat", "nope."],
-  ["owl", "who pushed to main?"],
-  ["pug", "is it merged yet?"],
-  ["raccoon", "found the bug"],
-];
-const bodies = STICKERS.map(([name, caption], i) => {
-  const img = document.createElement("img");
-  img.src = `/img/stickers/${name}.webp`;
-  img.alt = `Sticker: ${caption}`;
-  img.draggable = false;
-  img.className = "pit-sticker";
-  pit.append(img);
-  return { img, x: 0, y: 0, vx: 0, vy: 0, a: (Math.random() - 0.5) * 0.6, va: 0, r: 0, held: false, i };
-});
-let pitW = 0;
-let pitH = 0;
-let pitRunning = false;
-let pitDropped = false;
-function pitSize() {
-  pitW = pit.clientWidth;
-  pitH = pit.clientHeight;
-  const size = Math.min(150, Math.max(84, pitW / 8));
-  for (const b of bodies) {
-    b.r = size / 2;
-    b.img.style.width = b.img.style.height = `${size}px`;
-  }
-}
-function pitDraw() {
-  for (const b of bodies) b.img.style.transform = `translate(${b.x - b.r}px, ${b.y - b.r}px) rotate(${b.a}rad)`;
-}
-function pitStep(dt) {
-  const g = 2400;
-  let moving = false;
-  for (const b of bodies) {
-    if (b.held) {
-      moving = true;
-      continue;
-    }
-    b.vy += g * dt;
-    b.x += b.vx * dt;
-    b.y += b.vy * dt;
-    b.a += b.va * dt;
-    // Walls and floor, with a little bounce and rolling friction.
-    if (b.y + b.r > pitH) {
-      b.y = pitH - b.r;
-      b.vy *= -0.38;
-      b.vx *= 0.9;
-      b.va = b.vx / b.r;
-      if (Math.abs(b.vy) < 40) b.vy = 0;
-    }
-    if (b.x - b.r < 0) {
-      b.x = b.r;
-      b.vx = Math.abs(b.vx) * 0.5;
-    }
-    if (b.x + b.r > pitW) {
-      b.x = pitW - b.r;
-      b.vx = -Math.abs(b.vx) * 0.5;
-    }
-    b.va *= 0.985;
-    if (Math.abs(b.vx) > 4 || Math.abs(b.vy) > 4 || b.y + b.r < pitH - 1) moving = true;
-  }
-  // Stickers push each other apart as circles.
-  for (let k = 0; k < 3; k++) {
-    for (let i = 0; i < bodies.length; i++) {
-      for (let j = i + 1; j < bodies.length; j++) {
-        const p = bodies[i];
-        const q = bodies[j];
-        const dx = q.x - p.x;
-        const dy = q.y - p.y;
-        const min = (p.r + q.r) * 0.86;
-        const d2 = dx * dx + dy * dy;
-        if (d2 >= min * min || d2 === 0) continue;
-        const d = Math.sqrt(d2);
-        const push = (min - d) / 2;
-        const nx = dx / d;
-        const ny = dy / d;
-        const pw = p.held ? 0 : q.held ? 2 : 1;
-        const qw = q.held ? 0 : p.held ? 2 : 1;
-        p.x -= nx * push * pw;
-        p.y -= ny * push * pw;
-        q.x += nx * push * qw;
-        q.y += ny * push * qw;
-        const rel = (q.vx - p.vx) * nx + (q.vy - p.vy) * ny;
-        if (rel < 0) {
-          const impulse = -rel * 0.6;
-          if (!p.held) {
-            p.vx -= nx * impulse * 0.5;
-            p.vy -= ny * impulse * 0.5;
-          }
-          if (!q.held) {
-            q.vx += nx * impulse * 0.5;
-            q.vy += ny * impulse * 0.5;
-          }
-        }
-      }
-    }
-  }
-  return moving;
-}
-let pitLast = 0;
-function pitLoop(now) {
-  const dt = Math.min(1 / 30, (now - pitLast) / 1000 || 1 / 60);
-  pitLast = now;
-  let moving = false;
-  for (let s = 0; s < 2; s++) moving = pitStep(dt / 2) || moving;
-  pitDraw();
-  if (moving) requestAnimationFrame(pitLoop);
-  else pitRunning = false;
-}
-function pitWake() {
-  if (pitRunning) return;
-  pitRunning = true;
-  pitLast = performance.now();
-  requestAnimationFrame(pitLoop);
-}
-function pitDrop() {
-  pitSize();
-  bodies.forEach((b, i) => {
-    if (reduced) {
-      b.x = ((i + 0.5) / bodies.length) * pitW;
-      b.y = pitH - b.r;
-      return;
-    }
-    b.x = b.r + Math.random() * (pitW - 2 * b.r);
-    b.y = -b.r - i * b.r * 1.6;
-    b.vx = (Math.random() - 0.5) * 300;
-    b.vy = 0;
-    b.va = (Math.random() - 0.5) * 4;
-  });
-  pitDraw();
-  pit.classList.add("is-live");
-  if (!reduced) pitWake();
-}
-new IntersectionObserver(
-  (entries) => {
-    if (!pitDropped && entries.some((entry) => entry.isIntersecting)) {
-      pitDropped = true;
-      pitDrop();
-    }
-  },
-  { threshold: 0.3 },
-).observe(pit);
-new ResizeObserver(() => {
-  if (!pitDropped) return;
-  const before = pitW;
-  pitSize();
-  for (const b of bodies) b.x = Math.min(pitW - b.r, (b.x / (before || pitW)) * pitW);
-  pitDraw();
-  if (!reduced) pitWake();
-}).observe(pit);
-// Drag and throw.
-let grab = null;
-pit.addEventListener("pointerdown", (event) => {
-  const b = bodies.find((x) => x.img === event.target);
-  if (!b || reduced) return;
-  event.preventDefault();
-  const r = pit.getBoundingClientRect();
-  grab = { b, id: event.pointerId, ox: event.clientX - r.left - b.x, oy: event.clientY - r.top - b.y, t: performance.now(), px: event.clientX, py: event.clientY };
-  b.held = true;
-  b.vx = b.vy = 0;
-  b.img.classList.add("is-held");
-  pit.setPointerCapture(event.pointerId);
-  pitWake();
-});
-pit.addEventListener("pointermove", (event) => {
-  if (!grab || event.pointerId !== grab.id) return;
-  const r = pit.getBoundingClientRect();
-  const now = performance.now();
-  const dt = Math.max(1, now - grab.t) / 1000;
-  const { b } = grab;
-  b.vx = b.vx * 0.5 + ((event.clientX - grab.px) / dt) * 0.5;
-  b.vy = b.vy * 0.5 + ((event.clientY - grab.py) / dt) * 0.5;
-  b.x = Math.min(pitW - b.r, Math.max(b.r, event.clientX - r.left - grab.ox));
-  b.y = Math.min(pitH - b.r, event.clientY - r.top - grab.oy);
-  b.a += (event.clientX - grab.px) * 0.004;
-  grab.t = now;
-  grab.px = event.clientX;
-  grab.py = event.clientY;
-});
-const release = (event) => {
-  if (!grab || event.pointerId !== grab.id) return;
-  const { b } = grab;
-  b.held = false;
-  b.vx = Math.max(-2600, Math.min(2600, b.vx));
-  b.vy = Math.max(-2600, Math.min(2600, b.vy));
-  b.va = b.vx / (b.r * 2);
-  b.img.classList.remove("is-held");
-  grab = null;
-  pitWake();
-};
-pit.addEventListener("pointerup", release);
-pit.addEventListener("pointercancel", release);
 
 // Releases: a list of versions beside the open one, like a chat list beside a chat.
 const rb = $("[data-rb]");
@@ -569,6 +349,8 @@ async function freshReleases() {
     selectRelease(fresh[fresh.length - 1].tag);
     const latest = version(fresh[fresh.length - 1].tag);
     for (const node of $$("[data-latest-version]")) node.textContent = latest;
+    const pill = $("[data-latest-pill-text]");
+    if (pill) pill.textContent = pillText(fresh[fresh.length - 1], HIGHLIGHTS);
     const count = $("[data-release-count]");
     if (count) count.textContent = String($$(".rb-row", rbList).length);
   } catch {
@@ -710,9 +492,54 @@ function update() {
   }
 }
 
+// The gallery rail: pinned while the page scrolls past it, sliding sideways
+// by exactly as far as the cards run past the screen. Cards near the middle
+// stand up straight; the rest lean back and dim a little.
+const rail = $("[data-rail]");
+const railTrack = $("[data-rail-track]");
+const railBar = $("[data-rail-bar]");
+let railRun = 0;
+// The rail moves a little faster than the page, so nine themes take fewer screens of scrolling.
+const RAIL_PACE = 0.7;
+let railCards = [];
+let railLast = -1;
+function railMeasure() {
+  if (!rail || reduced) return;
+  railTrack.style.transform = "";
+  railRun = Math.max(0, railTrack.scrollWidth - railTrack.clientWidth);
+  rail.style.height = `${innerHeight + railRun * RAIL_PACE}px`;
+  railCards = $$(".rail-card", railTrack).map((card) => ({ card, mid: card.offsetLeft + card.offsetWidth / 2 }));
+  railLast = -1;
+}
+function railUpdate() {
+  if (!rail || reduced || !railRun) return;
+  const top = rail.offsetTop;
+  const y = window.scrollY;
+  if (y < top - innerHeight || y > top + railRun * RAIL_PACE + innerHeight) return;
+  const p = Math.min(1, Math.max(0, (y - top) / (railRun * RAIL_PACE)));
+  if (Math.abs(p - railLast) < 0.0002) return;
+  railLast = p;
+  const x = p * railRun;
+  railTrack.style.transform = `translate3d(${-x}px, 0, 0)`;
+  if (railBar) railBar.style.transform = `scaleX(${0.08 + p * 0.92})`;
+  const centre = x + railTrack.clientWidth / 2;
+  const half = railTrack.clientWidth / 2 || 1;
+  for (const { card, mid } of railCards) {
+    const d = Math.max(-1.5, Math.min(1.5, (mid - centre) / half));
+    card.style.setProperty("--d", d.toFixed(3));
+  }
+}
+if (rail && !reduced) {
+  document.documentElement.classList.add("has-rail");
+  railMeasure();
+  addEventListener("resize", railMeasure);
+  addEventListener("load", railMeasure);
+}
+
 function loop(now) {
   lenis?.raf(now);
   update();
+  railUpdate();
   requestAnimationFrame(loop);
 }
 

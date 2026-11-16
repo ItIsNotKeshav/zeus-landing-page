@@ -61,11 +61,11 @@
         <div class="hero-copy">
           <a class="news-pill" href="#releases" data-latest-pill>
             <span class="news-dot" aria-hidden="true"></span>
-            <span>New in <strong>Zeus %LATEST_VERSION%</strong>: first-run setup, split view and much faster search</span>
+            <span>New in <strong>Zeus <span data-latest-version>%LATEST_VERSION%</span></strong>: <span data-latest-pill-text>%LATEST_PILL%</span></span>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
-          <h1 class="hero-title" data-split>WhatsApp, <em>finally</em> at home on&nbsp;your desktop.</h1>
-          <p class="lede">A native app written in Rust for Windows, macOS and Linux. No browser inside, so it opens in a blink and stays light.</p>
+          <h1 class="hero-title" data-split>WhatsApp as a <em>real</em> desktop&nbsp;app.</h1>
+          <p class="lede">No browser inside, so it opens in a blink and needs a fraction of WhatsApp Web's memory. Free for Windows, macOS and&nbsp;Linux.</p>
           <div class="actions">
             <a class="btn btn-big btn-charge" href="#download"><svg class="btn-bolt" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/></svg>Download Zeus %LATEST_VERSION%</a>
             <a class="btn btn-quiet btn-big" href="#tour">Watch the tour</a>
@@ -149,24 +149,123 @@
       </div>
     </section>
 
-    <section class="calls" id="calls" aria-labelledby="calls-title">
-      <div class="plate" data-reveal>
-        <img data-call-image src="/img/call-group.webp" alt="A group video call in Zeus with five people" width="960" height="960" loading="lazy">
+    <!-- The highlights: features on a rail that slides sideways as you scroll
+         (main.js pins it and sets its offset). -->
+    <section class="rail" id="highlights" aria-labelledby="gallery-title" data-rail>
+      <div class="rail-pin">
+        <div class="rail-head">
+          <h2 id="gallery-title">What it does, one scroll.</h2>
+          <p>Keep scrolling to slide through the highlights.</p>
+        </div>
+        <div class="rail-track" data-rail-track>
+          <article class="rail-card">
+            <img src="/img/features/chats.webp" alt="The chat list in Zeus, dark" width="960" height="720" loading="lazy" decoding="async">
+            <div class="rail-text">
+              <span class="rail-num">01</span>
+              <h3>Every chat at a glance</h3>
+              <p>Filters for unread, private and favourites, typing and mentions right in the list, and pins where your phone keeps them.</p>
+            </div>
+          </article>
+          <article class="rail-card">
+            <img src="/img/features/photos.webp" alt="A photo message with reactions, in the Dracula theme" width="960" height="720" loading="lazy" decoding="async">
+            <div class="rail-text">
+              <span class="rail-num">02</span>
+              <h3>Photos, albums and reactions</h3>
+              <p>Pictures open in a full-window viewer, albums travel together, and reactions sit right on the message.</p>
+            </div>
+          </article>
+          <article class="rail-card">
+            <img src="/img/features/voice.webp" alt="A voice note and a quoted reply, in the Gruvbox theme" width="960" height="720" loading="lazy" decoding="async">
+            <div class="rail-text">
+              <span class="rail-num">03</span>
+              <h3>Voice notes and replies</h3>
+              <p>Record, seek and play at up to 2x. Quote any message and jump back to it with a click.</p>
+            </div>
+          </article>
+          <article class="rail-card">
+            <img src="/img/features/links.webp" alt="A link preview card, in the Nord theme" width="960" height="720" loading="lazy" decoding="async">
+            <div class="rail-text">
+              <span class="rail-num">04</span>
+              <h3>Link previews</h3>
+              <p>Links show their title, picture and site, even before you send them.</p>
+            </div>
+          </article>
+          <article class="rail-card">
+            <img src="/img/features/themes.webp" alt="Zeus in the Solarized theme" width="960" height="720" loading="lazy" decoding="async">
+            <div class="rail-text">
+              <span class="rail-num">05</span>
+              <h3>Nine themes, any accent</h3>
+              <p>Zeus, WhatsApp, Messages and six more, each light or dark, with an accent of your own.</p>
+            </div>
+          </article>
+          <article class="rail-card">
+            <img src="/img/features/lock.webp" alt="The app lock screen" width="960" height="720" loading="lazy" decoding="async">
+            <div class="rail-text">
+              <span class="rail-num">06</span>
+              <h3>App lock</h3>
+              <p>A password on the window for when you step away. Locked chats get their own folder too.</p>
+            </div>
+          </article>
+          <article class="rail-card">
+            <img src="/img/features/qr.webp" alt="The link your phone screen with its QR code" width="960" height="720" loading="lazy" decoding="async">
+            <div class="rail-text">
+              <span class="rail-num">07</span>
+              <h3>Set up in a minute</h3>
+              <p>A short first-run setup picks your look, then you scan one QR code with your phone.</p>
+            </div>
+          </article>
+        </div>
+        <div class="rail-bar" aria-hidden="true"><i data-rail-bar></i></div>
       </div>
-      <div class="calls-side">
-        <div class="tabs" role="group" aria-label="Kinds of call">
-          <button type="button" aria-pressed="true" data-call="group">Group</button>
-          <button type="button" aria-pressed="false" data-call="video">Video</button>
-          <button type="button" aria-pressed="false" data-call="voice">Voice</button>
+    </section>
+
+    <!-- Two chats at once: split view and chat bubbles in one framed window,
+         taking turns like the calls until the reader picks one. -->
+    <section class="calls two" id="two-chats" aria-labelledby="two-title" data-switcher="two">
+      <div class="calls-side" data-reveal>
+        <span class="two-badge"><i aria-hidden="true"></i>New in 0.42 · Experimental</span>
+        <h2 id="two-title">Two chats at once.</h2>
+        <div class="call-switch" role="group" aria-label="Ways to keep two chats open" data-sw-switch>
+          <button type="button" aria-pressed="true" data-sw="split"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="3"/><path d="M12 4.5v15"/></svg>Split view</button>
+          <button type="button" aria-pressed="false" data-sw="bubbles"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="5"/><circle cx="17" cy="16" r="3.5"/></svg>Chat bubbles</button>
+          <span class="call-timer" aria-hidden="true"><i data-sw-timer></i></span>
         </div>
-        <div class="calls-copy" data-reveal>
-          <h2 id="calls-title">Calls that carry.</h2>
-          <p data-call-text>Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.</p>
+        <p class="call-text" data-sw-text>Drag a chat onto the open one and read both side by side. Drag a message or a picture across to send it to the other chat.</p>
+        <ul class="call-notes">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 14 9l5.5.5-4.2 3.7 1.3 5.5L12 15.8l-4.6 2.9 1.3-5.5L4.5 9.5 10 9z"/></svg>Bubbles glow while their chat has unread messages.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7"/></svg>Set a chat to bubble up when it gets a new message, up to three at once.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg>Both are off at first: turn them on in Settings, under Experimental.</li>
+        </ul>
+      </div>
+      <div class="call-frame two-frame frame-glass" data-reveal>
+        <img class="call-shot is-on" data-sw-shot="split" src="/img/two-split.webp" alt="Zeus with two chats side by side in split view" width="1920" height="1200" loading="lazy">
+        <img class="call-shot" data-sw-shot="bubbles" src="/img/two-bubbles.webp" alt="A Zeus chat bubble open over the desktop, with a photo ready to send" width="1920" height="1200" loading="lazy">
+      </div>
+    </section>
+
+    <!-- Calls: the three kinds in one framed window, cycling on their own until
+         the reader picks one. -->
+    <section class="calls" id="calls" aria-labelledby="calls-title" data-switcher="calls">
+      <div class="call-frame frame-glass" data-reveal>
+        <img class="call-shot is-on" data-sw-shot="group" src="/img/call-group.webp" alt="A group video call in Zeus with five people" width="960" height="960" loading="lazy">
+        <img class="call-shot" data-sw-shot="video" src="/img/call-video.webp" alt="A one-to-one video call in Zeus, the other person's camera filling the window" width="960" height="960" loading="lazy">
+        <img class="call-shot" data-sw-shot="voice" src="/img/call-voice.webp" alt="A voice call in Zeus with Luna Starling, three minutes in" width="960" height="960" loading="lazy">
+        <span class="call-live" aria-hidden="true"><i></i>Live</span>
+      </div>
+      <div class="calls-side" data-reveal>
+        <h2 id="calls-title">Calls that carry.</h2>
+        <div class="call-switch" role="group" aria-label="Kinds of call" data-sw-switch>
+          <button type="button" aria-pressed="true" data-sw="group"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9.5" r="2.6"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14.5 18.5a4 4 0 0 1 6.5-3"/></svg>Group</button>
+          <button type="button" aria-pressed="false" data-sw="video"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6.5" width="12.5" height="11" rx="3"/><path d="M15.5 10.5 21 7.5v9l-5.5-3z"/></svg>Video</button>
+          <button type="button" aria-pressed="false" data-sw="voice"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.5h3l1.5 4-2 1.5a10 10 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15 15 0 0 1 3.5 6.5a2 2 0 0 1 2-2z"/></svg>Voice</button>
+          <span class="call-timer" aria-hidden="true"><i data-sw-timer></i></span>
         </div>
-        <div class="cells">
-          <p class="cell">Echo cancelling keeps your speakers out of the call and lifts quiet voices.</p>
-          <p class="cell cell-alt">Turn on push to talk, then hold Space when the room is loud.</p>
-        </div>
+        <p class="call-text" data-sw-text>Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.</p>
+        <ul class="call-notes">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h2l2-5 3 10 3-8 2 3h4"/></svg>Echo cancelling keeps your speakers out of the call and lifts quiet voices.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Push to talk: hold Space when the room is loud.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Switch microphone or speaker mid-call; the call carries on.</li>
+        </ul>
       </div>
     </section>
 
@@ -298,17 +397,9 @@
     <div class="footer-top">
       <div class="footer-invite">
         <h2 id="footer-title">Leave the browser tab behind.</h2>
-        <div class="footer-chat" data-footer-chat>
-          <div class="fc-head">
-            <img src="/logo.svg" alt="" width="36" height="36">
-            <div><strong>Zeus</strong><span data-fc-status>online</span></div>
-          </div>
-          <div class="fc-log" aria-live="polite" data-fc-log></div>
-          <div class="fc-replies">
-            <a class="fc-chip is-main" href="https://github.com/ItIsNotKeshav/Zeus/releases/latest">Yes, download Zeus</a>
-            <a class="fc-chip" href="https://github.com/ItIsNotKeshav/Zeus">Star it on GitHub</a>
-            <button type="button" class="fc-chip" data-joke>Tell me a joke</button>
-          </div>
+        <div class="actions">
+          <a class="btn btn-big btn-charge" href="#download"><svg class="btn-bolt" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/></svg>Download Zeus</a>
+          <a class="btn btn-quiet btn-big" href="https://github.com/ItIsNotKeshav/Zeus">Star it on GitHub</a>
         </div>
       </div>
       <ul class="footer-links">
@@ -318,9 +409,6 @@
         <li><a href="https://zapfast.rocks/">ZapFast's guides</a></li>
         <li><a href="https://github.com/ItIsNotKeshav/Zeus/issues">Report a problem</a></li>
       </ul>
-    </div>
-    <div class="sticker-pit" data-pit role="group" aria-label="Stickers from the demo, to drag and throw">
-      <p class="pit-hint" aria-hidden="true">Go on, throw them about.</p>
     </div>
     <div class="footer-credits">
       <p>Zeus is a fork of <a href="https://github.com/crmne/zapfast">ZapFast</a>, created by Carmine Paolino and its contributors. The app, its design and almost all of its code are their work, built on <a href="https://github.com/oxidezap/whatsapp-rust">whatsapp-rust</a>, <a href="https://www.egui.rs">egui</a> and <a href="https://fastframe.dev">fastframe</a>.</p>

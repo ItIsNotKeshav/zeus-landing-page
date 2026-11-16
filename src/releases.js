@@ -153,3 +153,22 @@ export const fromApi = (r) => ({
   prerelease: Boolean(r.prerelease),
   body: r.body || "",
 });
+
+// The hero pill's few words about a release: a hand-written line from
+// src/highlights.json when there is one, otherwise the list in the notes' opening
+// sentence ("Zeus 0.42.0 brings a, b, c and d." gives "a, b and c" while it stays
+// short). A new release fills the pill on its own; a better line can go into
+// highlights.json at any time.
+export function pillText(release, highlights = {}) {
+  if (highlights[release.tag]) return highlights[release.tag];
+  const opening = (release.body || "").replace(/\r\n?/g, "\n").split("\n\n")[0].replace(/[*_`]/g, "").replace(/\s+/g, " ");
+  const list = opening.match(/^Zeus\s+v?[\d.]+\S*\s+(?:brings|adds)\s+(.+?)\.?$/i)?.[1];
+  if (!list) return "see what's new";
+  const items = list.split(/,\s*(?:and\s+)?|\s+and\s+(?=[^,]*$)/).map((item) => item.trim()).filter(Boolean);
+  let picked = items.slice(0, 1);
+  for (const item of items.slice(1)) {
+    if ([...picked, item].join(", ").length > 64) break;
+    picked.push(item);
+  }
+  return picked.length > 1 ? `${picked.slice(0, -1).join(", ")} and ${picked.at(-1)}` : picked[0];
+}

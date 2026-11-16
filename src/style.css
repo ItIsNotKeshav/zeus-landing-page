@@ -4163,3 +4163,517 @@ main > section.themes {
 .is-light .bolts.is-far {
   filter: blur(0.3px) drop-shadow(0 0 6px #2f7bff) drop-shadow(0 0 20px #5a98ff);
 }
+
+/* Hero icons: the same line icons, without their tiles. */
+.tiles .tile,
+.tiles .t3,
+.tiles .t4 {
+  width: clamp(40px, 3.4vw, 52px);
+  height: clamp(40px, 3.4vw, 52px);
+  border-radius: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.tiles .tile svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 4px 10px rgb(20 40 90 / 0.18));
+}
+
+.is-dark .tiles .tile svg {
+  filter: drop-shadow(0 4px 12px rgb(0 0 0 / 0.5));
+}
+
+.tiles .t1 { top: 14%; left: 9%; }
+.tiles .t2 { top: 12%; right: 11%; }
+
+/* ===========================================================================
+   Gallery rail: every theme on one row that slides sideways as the page
+   scrolls (main.js sets the section's height and the track's offset). The
+   card in the middle stands up; the others lean back a little and dim.
+   =========================================================================== */
+main > section.rail {
+  position: relative;
+  padding: var(--section) 0 0;
+}
+
+.rail-pin {
+  display: grid;
+  align-content: center;
+  gap: clamp(28px, 4vw, 48px);
+  min-height: 100svh;
+  padding-block: 80px 40px;
+  overflow: hidden;
+}
+
+.has-rail .rail-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+
+.rail-head {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: var(--m);
+}
+
+.rail-head p {
+  color: var(--muted);
+}
+
+.rail-track {
+  --card: min(64vw, 820px);
+  display: flex;
+  gap: clamp(16px, 2.4vw, 32px);
+  padding-inline: calc(50vw - var(--card) / 2);
+  will-change: transform;
+}
+
+.rail-card {
+  --d: 0;
+  flex: none;
+  width: var(--card);
+  margin: 0;
+  transform: translateY(calc(min(1, abs(var(--d))) * 18px)) scale(calc(1 - min(1, abs(var(--d))) * 0.1));
+  opacity: calc(1 - min(1, abs(var(--d))) * 0.5);
+  transform-origin: 50% 50%;
+}
+
+.rail-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-dialog);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 30px 70px -24px rgb(0 0 0 / 0.45);
+}
+
+.rail-card figcaption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-inline: 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.rail-card figcaption span + span {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.rail-bar {
+  width: min(240px, 50vw);
+  height: 3px;
+  margin-inline: auto;
+  border-radius: 3px;
+  background: var(--tint-field);
+  overflow: hidden;
+}
+
+.rail-bar i {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+  transform: scaleX(0.08);
+  transform-origin: 0 50%;
+}
+
+/* Without the pin (reduced motion or no script) the rail is a plain swipe row. */
+:root:not(.has-rail) .rail-track {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-inline: var(--m);
+  scrollbar-width: none;
+}
+
+:root:not(.has-rail) .rail-card {
+  scroll-snap-align: center;
+  transform: none;
+  opacity: 1;
+}
+
+:root:not(.has-rail) .rail-bar {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .rail-track {
+    --card: 82vw;
+  }
+
+  .rail-card img {
+    border-radius: var(--radius-panel);
+  }
+}
+
+.rail-track {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Highlights rail: each card a picture of a feature with a few words. */
+.rail-track {
+  --card: min(46vw, 560px);
+}
+
+.rail-card {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 8px 8px 22px;
+  border-radius: var(--radius-dialog);
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 30px 70px -30px rgb(0 0 0 / 0.45);
+}
+
+.rail-card img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: calc(var(--radius-dialog) - 8px);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+}
+
+.rail-text {
+  display: grid;
+  gap: 8px;
+  padding-inline: 14px;
+}
+
+.rail-num {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.rail-text h3 {
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.rail-text p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .rail-track {
+    --card: 80vw;
+  }
+
+  .rail-card {
+    border-radius: var(--radius-panel);
+  }
+
+  .rail-card img {
+    border-radius: calc(var(--radius-panel) - 8px);
+  }
+}
+
+/* ===========================================================================
+   Calls: one framed window that changes between group, video and voice, a
+   sliding pill to pick (with a thin line showing when it turns on its own),
+   and the details as a short list with icons.
+   =========================================================================== */
+main > section.calls {
+  grid-template-columns: minmax(0, 560px) minmax(0, 440px);
+  justify-content: center;
+  align-items: center;
+  column-gap: clamp(32px, 6vw, 96px);
+  min-height: 0;
+}
+
+.call-frame {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.call-shot {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: calc(var(--radius-dialog) - 8px);
+  opacity: 0;
+  transform: scale(1.04);
+  filter: blur(6px);
+  transition:
+    opacity 0.6s var(--ease-out-strong),
+    transform 0.9s var(--ease-out-strong),
+    filter 0.6s var(--ease-out-strong);
+}
+
+.call-shot.is-on {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.call-live {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(10 10 10 / 0.55);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.call-live i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #30d158;
+  animation: call-pulse 1.8s ease-out infinite;
+}
+
+@keyframes call-pulse {
+  0% { box-shadow: 0 0 0 0 rgb(48 209 88 / 0.6); }
+  70%, 100% { box-shadow: 0 0 0 8px rgb(48 209 88 / 0); }
+}
+
+main > section.calls .calls-side {
+  display: grid;
+  justify-content: stretch;
+  gap: 24px;
+}
+
+.call-switch {
+  --at: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: min(360px, 100%);
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--tint-field);
+  overflow: hidden;
+}
+
+.call-switch::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 3);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  transform: translateX(calc(var(--at) * 100%));
+  transition: transform var(--duration-landing, 0.4s) var(--ease-out-strong);
+}
+
+.call-switch button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--duration-slide) var(--ease-out-strong);
+}
+
+.call-switch button[aria-pressed="true"] {
+  color: var(--on-accent);
+}
+
+.call-switch svg,
+.call-notes svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.call-timer {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 1px;
+  height: 2px;
+  pointer-events: none;
+}
+
+.call-timer i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--brand);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  opacity: 0.8;
+}
+
+.call-text {
+  min-height: 4.6em;
+  font-size: clamp(17px, 1.4vw, 19px);
+  line-height: 1.5;
+  transition: opacity 0.16s var(--ease-out), transform 0.16s var(--ease-out);
+}
+
+.call-text.is-swapping {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.call-notes {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.call-notes li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--outline);
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.call-notes li svg {
+  justify-self: center;
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 50%;
+  background: var(--tint-field);
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  main > section.calls {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 32px;
+  }
+
+  .call-frame {
+    padding: 4px;
+    border-radius: var(--radius-panel);
+  }
+
+  .call-shot {
+    border-radius: calc(var(--radius-panel) - 4px);
+  }
+
+  .call-switch {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-shot {
+    transition: none;
+    filter: none;
+  }
+
+  .call-live i {
+    animation: none;
+  }
+}
+
+main > section.calls {
+  background: transparent;
+  overflow: visible;
+}
+
+/* ===========================================================================
+   Two chats at once: split view and chat bubbles, in the calls' framed
+   window and pill, mirrored (window on the right) and wider for a whole app.
+   =========================================================================== */
+main > section.calls.two {
+  grid-template-columns: minmax(0, 420px) minmax(0, 660px);
+  padding-bottom: clamp(24px, 4vw, 56px);
+}
+
+.two .call-switch {
+  grid-template-columns: repeat(2, 1fr);
+  width: min(380px, 100%);
+}
+
+.two .call-switch::before {
+  width: calc((100% - 8px) / 2);
+}
+
+.two-frame {
+  aspect-ratio: 16 / 10;
+}
+
+.two-frame .call-shot {
+  object-fit: cover;
+  object-position: 0 0;
+}
+
+.two-badge {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--tint-field);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.two-badge i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 22%, transparent);
+}
+
+@media (max-width: 900px) {
+  main > section.calls.two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .two .call-frame {
+    order: -1;
+  }
+
+  .two .call-switch {
+    width: 100%;
+  }
+}
