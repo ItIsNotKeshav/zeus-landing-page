@@ -4615,3 +4615,65 @@ main > section.calls {
   background: transparent;
   overflow: visible;
 }
+
+/* ===========================================================================
+   Two chats at once: split view and chat bubbles, in the calls' framed
+   window and pill, mirrored (window on the right) and wider for a whole app.
+   =========================================================================== */
+main > section.calls.two {
+  grid-template-columns: minmax(0, 420px) minmax(0, 660px);
+  padding-bottom: clamp(24px, 4vw, 56px);
+}
+
+.two .call-switch {
+  grid-template-columns: repeat(2, 1fr);
+  width: min(380px, 100%);
+}
+
+.two .call-switch::before {
+  width: calc((100% - 8px) / 2);
+}
+
+.two-frame {
+  aspect-ratio: 16 / 10;
+}
+
+.two-frame .call-shot {
+  object-fit: cover;
+  object-position: 0 0;
+}
+
+.two-badge {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--tint-field);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.two-badge i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 22%, transparent);
+}
+
+@media (max-width: 900px) {
+  main > section.calls.two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .two .call-frame {
+    order: -1;
+  }
+
+  .two .call-switch {
+    width: 100%;
+  }
+}
