@@ -170,12 +170,17 @@ pick();
 
 // Switchers: a framed window whose pictures take turns on their own while the
 // section is on screen (the pill's thin line shows the wait); a click picks one
-// and stops the turns. Used by the calls and by split view and bubbles.
+// and stops the turns. Used by what's new, the calls, and split view and bubbles.
 const SWITCHER_TEXT = {
   calls: {
     group: "Answer when the group rings and see everyone at once, each on their own tile, with your camera beside them.",
     video: "Video one to one, up to 720p, stepping its quality up and down with your connection as the call goes.",
     voice: "Voice through the microphone and speaker you choose, with a clear timer and one tap to hang up.",
+  },
+  fresh: {
+    bar: "A small bar at the foot of your chats takes you to Chats, Calls, your profile and Settings. Point at an icon and it wobbles, rings or turns.",
+    settings: "Your account sits up front and each group of options has its own card. The page you open appears beside the categories, with no Back arrow in the way.",
+    look: "Preview a theme on a real chat, slide through the themes, and pick an accent that now works with every one of them. You can change the app icon too.",
   },
   two: {
     split: "Drag a chat onto the open one and read both side by side. Drag a message or a picture across to send it to the other chat.",
