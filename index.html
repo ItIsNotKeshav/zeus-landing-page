@@ -7,6 +7,7 @@
   <meta name="description" content="Zeus is a native WhatsApp client for Windows, macOS and Linux, written in Rust. No browser inside: about 150 MB of memory where WhatsApp Web needs over a gigabyte.">
   <meta name="theme-color" content="#f3f3f1">
   <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Zeus: WhatsApp for your desktop, native and fast">
   <meta property="og:description" content="A native WhatsApp client written in Rust. Light and dark, calls, themes, and your chats kept in an encrypted archive on your own computer.">
@@ -26,6 +27,7 @@
       <span>Zeus</span>
     </a>
     <nav class="nav-links" aria-label="Sections">
+      <a href="#new">New</a>
       <a href="#themes">Themes</a>
       <a href="#calls">Calls</a>
       <a href="#tour">Tour</a>
@@ -113,6 +115,68 @@
       <p class="note" data-reveal>Measured on ZapFast, the app Zeus is built on: medians of four paired runs on one Linux desktop, 15 September 2026. Builds with today's features idle nearer 200 MB. <a href="https://zapfast.rocks/benchmarks/">Method and raw data</a></p>
     </section>
 
+    <!-- What the latest release brings, in the calls' framed window and pill,
+         and what is ready for the next one (only shipped work goes in the
+         window; the rest waits in the list below). -->
+    <section class="calls two fresh" id="new" aria-labelledby="new-title" data-switcher="fresh">
+      <div class="calls-side" data-reveal>
+        <span class="two-badge"><i aria-hidden="true"></i>New in Zeus 0.43</span>
+        <h2 id="new-title">Calmer, and easier to get around.</h2>
+        <div class="call-switch" role="group" aria-label="What is new in 0.43" data-sw-switch>
+          <button type="button" aria-pressed="true" data-sw="bar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="3"/><path d="M3 15.5h18M7.5 17.5h.01M12 17.5h.01M16.5 17.5h.01"/></svg>Tab bar</button>
+          <button type="button" aria-pressed="false" data-sw="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Settings</button>
+          <button type="button" aria-pressed="false" data-sw="look"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M12 20.5c-1.5 0-2-1-2-2s1-2 2.5-2"/></svg>Your look</button>
+          <span class="call-timer" aria-hidden="true"><i data-sw-timer></i></span>
+        </div>
+        <p class="call-text" data-sw-text>A small bar at the foot of your chats takes you to Chats, Calls, your profile and Settings. Point at an icon and it wobbles, rings or turns.</p>
+        <ul class="call-notes">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="3"/><circle cx="9.5" cy="10" r="1.6"/><path d="m4.5 17 5-4.5 3.5 3 2.5-2 4 3.5"/></svg>Each chat row shows what is waiting inside: a photo, a voice note, a document. Missed calls stand out in red.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Voice notes look cleaner, and you drag along them to skip ahead.</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Times only where you need them: your newest message keeps its own, older ones show theirs on hover.</li>
+        </ul>
+      </div>
+      <div class="call-frame two-frame frame-glass" data-reveal>
+        <img class="call-shot is-on" data-sw-shot="bar" src="/img/new/tab-bar.webp" alt="Zeus 0.43 with the new bar at the foot of the chat list" width="1920" height="1200" loading="lazy">
+        <img class="call-shot" data-sw-shot="settings" src="/img/new/settings.webp" alt="The new Settings in Zeus 0.43, each group of options on its own card" width="1920" height="1200" loading="lazy">
+        <img class="call-shot" data-sw-shot="look" src="/img/new/appearance.webp" alt="Appearance in Zeus 0.43: a theme previewed on a real chat, theme tiles and a row of accents" width="1920" height="1200" loading="lazy">
+      </div>
+    </section>
+
+    <section class="soon" aria-labelledby="soon-title">
+      <div class="soon-head" data-reveal>
+        <p class="eyebrow">Coming next</p>
+        <h2 id="soon-title">Built, and on its way.</h2>
+        <p>Finished and waiting for the next release. Zeus updates itself, so it will simply turn up.</p>
+      </div>
+      <ul class="soon-grid">
+        <li class="soon-card" data-reveal>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h7l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M13.5 3.5V8.5h5M9 13h6M9 16.5h4"/></svg>
+          <h3>A PDF reader built in</h3>
+          <p>A PDF flies out of its message into a card you can page through and search, then back. Each one keeps your place.</p>
+        </li>
+        <li class="soon-card" data-reveal>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6.5" width="12.5" height="11" rx="3"/><path d="M15.5 10.5 21 7.5v9l-5.5-3z"/></svg>
+          <h3>Pick your camera</h3>
+          <p>Choose which camera video calls open with, in Settings, and check it in a live preview first.</p>
+        </li>
+        <li class="soon-card" data-reveal>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>
+          <h3>Search in a glass card</h3>
+          <p>Searching a chat opens in the same frosted card as the contact info, over the chat you are reading.</p>
+        </li>
+        <li class="soon-card" data-reveal>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3.5"/><path d="M10.5 9.5v5l4-2.5z"/></svg>
+          <h3>YouTube and Instagram previews</h3>
+          <p>Links to a video or a post show their picture right in the chat.</p>
+        </li>
+        <li class="soon-card" data-reveal>
+          <img src="/logo.svg" alt="" width="34" height="34">
+          <h3>New app icons</h3>
+          <p>One bolt-Z mark on glass tiles, redrawn for every icon in the picker, sharp down to the tray.</p>
+        </li>
+      </ul>
+    </section>
+
     <section class="daynight" aria-labelledby="daynight-title">
       <div class="daynight-copy" data-reveal>
         <p class="eyebrow">Light and dark</p>
@@ -179,7 +243,7 @@
             <div class="rail-text">
               <span class="rail-num">03</span>
               <h3>Voice notes and replies</h3>
-              <p>Record, seek and play at up to 2x. Quote any message and jump back to it with a click.</p>
+              <p>Record, drag along a note to skip ahead, and play at up to 2x. Quote any message and jump back to it with a click.</p>
             </div>
           </article>
           <article class="rail-card">
@@ -223,7 +287,7 @@
          taking turns like the calls until the reader picks one. -->
     <section class="calls two" id="two-chats" aria-labelledby="two-title" data-switcher="two">
       <div class="calls-side" data-reveal>
-        <span class="two-badge"><i aria-hidden="true"></i>New in 0.42 · Experimental</span>
+        <span class="two-badge"><i aria-hidden="true"></i>Experimental</span>
         <h2 id="two-title">Two chats at once.</h2>
         <div class="call-switch" role="group" aria-label="Ways to keep two chats open" data-sw-switch>
           <button type="button" aria-pressed="true" data-sw="split"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="3"/><path d="M12 4.5v15"/></svg>Split view</button>
@@ -296,10 +360,10 @@
             <li><button type="button" data-tip="Bold, italics, strikethrough and code, as WhatsApp writes them.">Formatting</button></li>
             <li><button type="button" data-tip="Mention one person, or everyone in a group with @all.">Mentions</button></li>
             <li><button type="button" data-tip="Create polls, vote, and see who chose what.">Polls</button></li>
-            <li><button type="button" data-tip="Star a message to find it later from the rail.">Starred messages</button></li>
+            <li><button type="button" data-tip="Star a message, then find it under Starred from the title at the top of your chats.">Starred messages</button></li>
             <li><button type="button" data-tip="Favorite chats stay in the order your phone keeps them.">Favorite chats</button></li>
             <li><button type="button" data-tip="Lock private chats behind their own folder.">Locked chats</button></li>
-            <li><button type="button" data-tip="Your newest message says Sent, Delivered or Read, in words.">Read labels</button></li>
+            <li><button type="button" data-tip="Under your newest message, Delivered or Read, in words. It steps aside once they reply.">Read labels</button></li>
             <li><button type="button" data-tip="Block from a chat's menu or the contact panel; the list lives in Settings.">Blocking</button></li>
             <li><button type="button" data-tip="Set a chat's timer from its menu, and the chat notes each change.">Disappearing messages</button></li>
           </ul>
@@ -309,7 +373,7 @@
           <ul>
             <li><button type="button" data-tip="Pictures chosen together travel as one album, and open in a full-window viewer.">Photos and albums</button></li>
             <li><button type="button" data-tip="Videos and round video notes play right in the chat.">Videos in place</button></li>
-            <li><button type="button" data-tip="Record, seek, and play back at 1.5 or 2 times speed.">Voice messages</button></li>
+            <li><button type="button" data-tip="Record, drag along a note to skip ahead, and play back at 1.5 or 2 times speed.">Voice messages</button></li>
             <li><button type="button" data-tip="Animated and Lottie stickers play, and your favourites sync with your phone.">Stickers</button></li>
             <li><button type="button" data-tip="Search GIPHY from the picker, with your own key in Settings.">GIF search</button></li>
             <li><button type="button" data-tip="Files show a preview and progress while they send.">Documents</button></li>
@@ -321,7 +385,7 @@
         <div class="feature-col" data-reveal>
           <h3>Desktop</h3>
           <ul>
-            <li><button type="button" data-tip="Link more than one number and switch from your picture on the rail.">Several numbers</button></li>
+            <li><button type="button" data-tip="Link more than one number and switch between them from your profile in the bar.">Several numbers</button></li>
             <li><button type="button" data-tip="Close the window and Zeus keeps you linked from the tray, with the unread count on its icon.">Tray and notifications</button></li>
             <li><button type="button" data-tip="Swipe chats to archive, pin or mute, and swipe a message to reply.">Touchpad swipes</button></li>
             <li><button type="button" data-tip="Drag a message onto a chat to forward it, or drag files out to your desktop.">Drag and drop</button></li>
@@ -329,6 +393,7 @@
             <li><button type="button" data-tip="Search, switch chats, reply and record without the mouse.">Keyboard shortcuts</button></li>
             <li><button type="button" data-tip="Select text across messages and copy it with names and times.">Copy across messages</button></li>
             <li><button type="button" data-tip="A password on the window when you step away.">App lock</button></li>
+            <li><button type="button" data-tip="Pick the icon Zeus shows in your dock or taskbar, from Settings, under Appearance.">App icons</button></li>
             <li><button type="button" data-tip="Translated into ten languages, from German to Traditional Chinese.">Ten languages</button></li>
             <li><button type="button" data-tip="Two minutes of smoothness, memory, CPU and GPU, run on sample chats, never yours.">Built-in benchmark</button></li>
             <li><button type="button" data-tip="Zeus checks for new releases and installs them itself.">Updates itself</button></li>
